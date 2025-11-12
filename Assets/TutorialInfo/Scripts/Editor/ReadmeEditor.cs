@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
+using UnityEditor;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 [CustomEditor(typeof(Readme))]
 [InitializeOnLoad]
@@ -39,10 +38,10 @@ public class ReadmeEditor : Editor
                 Debug.Log($"Could not find the Readme folder at {s_ReadmeSourceDirectory}");
             }
 
-            var readmeAsset = SelectReadme();
+            Readme readmeAsset = SelectReadme();
             if (readmeAsset != null)
             {
-                var path = AssetDatabase.GetAssetPath(readmeAsset);
+                string path = AssetDatabase.GetAssetPath(readmeAsset);
                 FileUtil.DeleteFileOrDirectory(path + ".meta");
                 FileUtil.DeleteFileOrDirectory(path);
             }
@@ -55,7 +54,7 @@ public class ReadmeEditor : Editor
     {
         if (!SessionState.GetBool(s_ShowedReadmeSessionStateName, false))
         {
-            var readme = SelectReadme();
+            Readme readme = SelectReadme();
             SessionState.SetBool(s_ShowedReadmeSessionStateName, true);
 
             if (readme && !readme.loadedLayout)
@@ -68,28 +67,26 @@ public class ReadmeEditor : Editor
 
     static void LoadLayout()
     {
-        var assembly = typeof(EditorApplication).Assembly;
-        var windowLayoutType = assembly.GetType("UnityEditor.WindowLayout", true);
-        var method = windowLayoutType.GetMethod("LoadWindowLayout", BindingFlags.Public | BindingFlags.Static);
+        Assembly assembly = typeof(EditorApplication).Assembly;
+        Type windowLayoutType = assembly.GetType("UnityEditor.WindowLayout", true);
+        MethodInfo method = windowLayoutType.GetMethod("LoadWindowLayout", BindingFlags.Public | BindingFlags.Static);
         method.Invoke(null, new object[] { Path.Combine(Application.dataPath, "TutorialInfo/Layout.wlt"), false });
     }
 
     static Readme SelectReadme()
     {
-        var ids = AssetDatabase.FindAssets("Readme t:Readme");
+        string[] ids = AssetDatabase.FindAssets("Readme t:Readme");
         if (ids.Length == 1)
         {
-            var readmeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GUIDToAssetPath(ids[0]));
+            Object readmeObject = AssetDatabase.LoadMainAssetAtPath(AssetDatabase.GUIDToAssetPath(ids[0]));
 
-            Selection.objects = new UnityEngine.Object[] { readmeObject };
+            Selection.objects = new[] { readmeObject };
 
             return (Readme)readmeObject;
         }
-        else
-        {
-            Debug.Log("Couldn't find a readme");
-            return null;
-        }
+
+        Debug.Log("Couldn't find a readme");
+        return null;
     }
 
     protected override void OnHeaderGUI()
@@ -97,7 +94,7 @@ public class ReadmeEditor : Editor
         var readme = (Readme)target;
         Init();
 
-        var iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 128f);
+        float iconWidth = Mathf.Min(EditorGUIUtility.currentViewWidth / 3f - 20f, 128f);
 
         GUILayout.BeginHorizontal("In BigTitle");
         {
@@ -125,7 +122,7 @@ public class ReadmeEditor : Editor
         var readme = (Readme)target;
         Init();
 
-        foreach (var section in readme.sections)
+        foreach (Readme.Section section in readme.sections)
         {
             if (!string.IsNullOrEmpty(section.heading))
             {
@@ -227,7 +224,7 @@ public class ReadmeEditor : Editor
 
     bool LinkLabel(GUIContent label, params GUILayoutOption[] options)
     {
-        var position = GUILayoutUtility.GetRect(label, LinkStyle, options);
+        Rect position = GUILayoutUtility.GetRect(label, LinkStyle, options);
 
         Handles.BeginGUI();
         Handles.color = LinkStyle.normal.textColor;

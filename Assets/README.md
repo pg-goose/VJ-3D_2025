@@ -20,3 +20,8 @@
 * [ ] So i música
 * [ ] Presentació del nivell amb tiles pujant des de baix
 
+
+# Notas C#
+- Si escrius una classe fora de `namespace X { }`, podras accedir a esa classe en tots els scripts
+- Si es fa codi dintre de `namespace X { }`, s'utilitza `using X` per poder utilitzar-l'ho.
+- Si alguna cosa pot ser nul·la es pot utilitzar `?`: `int? n;` i despres podem fer `n.HasValue` i `n.Value`.
