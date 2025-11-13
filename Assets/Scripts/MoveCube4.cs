@@ -55,77 +55,77 @@ public class MoveCube : MonoBehaviour
     {
         if(_bFalling)
         {
-			// If we have fallen, we just move down
-            transform.Translate(Vector3.down * fallSpeed * Time.deltaTime, Space.World);
+          // If we have fallen, we just move down
+          transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime), Space.World);
         }
         else if (_bMoving)
         {
-			// If we are moving, we rotate around the line formed by rotPoint and rotAxis an angle depending on deltaTime
-			// If this angle is larger than the remainder, we stop the movement
-            float amount = rotSpeed * Time.deltaTime;
-            if(amount > _rotRemainder)
-            {
-                transform.RotateAround(_rotPoint, _rotAxis, _rotRemainder * _rotDir);
-                _bMoving = false;
-            }
-            else
-            {
-                transform.RotateAround(_rotPoint, _rotAxis, amount * _rotDir);
-                _rotRemainder -= amount;
-            }
+          // If we are moving, we rotate around the line formed by rotPoint and rotAxis an angle depending on deltaTime
+          // If this angle is larger than the remainder, we stop the movement
+          float amount = rotSpeed * Time.deltaTime;
+          if(amount > _rotRemainder)
+          {
+            transform.RotateAround(_rotPoint, _rotAxis, _rotRemainder * _rotDir);
+            _bMoving = false;
+          }
+          else
+          {
+            transform.RotateAround(_rotPoint, _rotAxis, amount * _rotDir);
+            _rotRemainder -= amount;
+          }
         }
         else
         {
-			// If we are not falling, nor moving, we check first if we should fall, then if we have to move
-            if (!IsGrounded())
-            {
-                _bFalling = true;
+          // If we are not falling, nor moving, we check first if we should fall, then if we have to move
+          if (!IsGrounded())
+          {
+            _bFalling = true;
 				
-				// Play sound associated to falling
-                AudioSource.PlayClipAtPoint(fallSound, transform.position, 1.5f);
-            }
+            // Play sound associated to falling
+            AudioSource.PlayClipAtPoint(fallSound, transform.position, 1.5f);
+          }
 			
-			// Read the move action for input
-            Vector2 dir = _moveAction.ReadValue<Vector2>();
-            if(Math.Abs(dir.x) > 0.99 || Math.Abs(dir.y) > 0.99)
+          // Read the move action for input
+          Vector2 dir = _moveAction.ReadValue<Vector2>();
+          if(Math.Abs(dir.x) > 0.99 || Math.Abs(dir.y) > 0.99)
+          {
+            // If the absolute value of one of the axis is larger than 0.99, the player wants to move in a non diagonal direction
+            _bMoving = true;
+				
+            // We play a random movemnt sound
+            int iSound = Random.Range(0, sounds.Length);
+            AudioSource.PlayClipAtPoint(sounds[iSound], transform.position, 1.0f);
+				
+            // Set rotDir, rotRemainder, rotPoint, and rotAxis according to the movement the player wants to make
+            if (dir.x > 0.99)
             {
-				// If the absolute value of one of the axis is larger than 0.99, the player wants to move in a non diagonal direction
-                _bMoving = true;
-				
-				// We play a random movemnt sound
-                int iSound = Random.Range(0, sounds.Length);
-                AudioSource.PlayClipAtPoint(sounds[iSound], transform.position, 1.0f);
-				
-				// Set rotDir, rotRemainder, rotPoint, and rotAxis according to the movement the player wants to make
-                if (dir.x > 0.99)
-                {
-                    _rotDir = -1.0f;
-                    _rotRemainder = 90.0f;
-                    _rotAxis = new Vector3(0.0f, 0.0f, 1.0f);
-                    _rotPoint = transform.position + new Vector3(0.5f, -0.5f, 0.0f);
-                }
-                else if (dir.x < -0.99)
-                {
-                    _rotDir = 1.0f;
-                    _rotRemainder = 90.0f;
-                    _rotAxis = new Vector3(0.0f, 0.0f, 1.0f);
-                    _rotPoint = transform.position + new Vector3(-0.5f, -0.5f, 0.0f);
-                }
-                else if (dir.y > 0.99)
-                {
-                    _rotDir = 1.0f;
-                    _rotRemainder = 90.0f;
-                    _rotAxis = new Vector3(1.0f, 0.0f, 0.0f);
-                    _rotPoint = transform.position + new Vector3(0.0f, -0.5f, 0.5f);
-                }
-                else if (dir.y < -0.99)
-                {
-                    _rotDir = -1.0f;
-                    _rotRemainder = 90.0f;
-                    _rotAxis = new Vector3(1.0f, 0.0f, 0.0f);
-                    _rotPoint = transform.position + new Vector3(0.0f, -0.5f, -0.5f);
-                }
+              _rotDir       = -1.0f;
+              _rotRemainder = 90.0f;
+              _rotAxis      = new Vector3(0.0f, 0.0f, 1.0f);
+              _rotPoint     = transform.position + new Vector3(0.5f, -0.5f, 0.0f);
             }
+            else if (dir.x < -0.99)
+            {
+              _rotDir       = 1.0f;
+              _rotRemainder = 90.0f;
+              _rotAxis      = new Vector3(0.0f, 0.0f, 1.0f);
+              _rotPoint     = transform.position + new Vector3(-0.5f, -0.5f, 0.0f);
+            }
+            else if (dir.y > 0.99)
+            {
+              _rotDir       = 1.0f;
+              _rotRemainder = 90.0f;
+              _rotAxis      = new Vector3(1.0f, 0.0f, 0.0f);
+              _rotPoint     = transform.position + new Vector3(0.0f, -0.5f, 0.5f);
+            }
+            else if (dir.y < -0.99)
+            {
+              _rotDir       = -1.0f;
+              _rotRemainder = 90.0f;
+              _rotAxis      = new Vector3(1.0f, 0.0f, 0.0f);
+              _rotPoint     = transform.position + new Vector3(0.0f, -0.5f, -0.5f);
+            }
+          }
         }
     }
 

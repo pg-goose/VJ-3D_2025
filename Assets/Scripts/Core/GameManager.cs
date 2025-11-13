@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
   private const string Level = "Level";
 
   public static GameManager Instance     { get; private set; }
-  public        int         CurrentLevel { get; private set; } = 0;
+  public        int         CurrentLevel { get; private set; }
 
   private int _nbLevels = 9;
 

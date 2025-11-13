@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
 
 public class LevelSwapKeys : MonoBehaviour
 {
-  private KeyCode[] _keys = {
+  private readonly KeyCode[] _keys = {
     KeyCode.Alpha0, KeyCode.Keypad0,
     KeyCode.Alpha1, KeyCode.Keypad1,
     KeyCode.Alpha2, KeyCode.Keypad2,

@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/bloxord-styles.uss?fileID=7433441132597879392&amp;guid=f0c1b81c040d84302b31f52494b7382a&amp;type=3#bloxord-styles" />
+    <ui:VisualElement name="background" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Textures/background.png?fileID=2800000&amp;guid=4be712c1dce2029bd919cc90f2ebdcd7&amp;type=3#background&quot;); height: 201px; width: 922px; align-self: center; align-content: center; justify-content: center;">
+        <ui:VisualElement name="menu-container" style="flex-grow: 0; color: rgb(255, 255, 255); bottom: auto; align-items: center; align-content: center; align-self: center; width: 50%; height: 50%; justify-content: center;">
+            <ui:Label text="Bloxord de los chinos" style="align-self: center; align-content: center; -unity-text-align: middle-left; -unity-font-style: bold; font-size: 24px;" />
+            <ui:Button text="Start New Game" name="start-game-button" class="main-menu-button" />
+            <ui:Button text="Load Game" name="load-game-button" class="main-menu-button" />
+            <ui:Button text="Toggle Sound" name="toggle-sound-button" class="main-menu-button" />
+            <ui:Button text="Credits" name="credits-button" class="main-menu-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
