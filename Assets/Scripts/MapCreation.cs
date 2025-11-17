@@ -33,7 +33,7 @@ public class MapCreation : MonoBehaviour
     for (int x = 0; x < sizeX; x++) {
       if (nums[z * sizeX + x + 2] == 2) {
         // Instantiate the copy at its corresponding location
-        //Instantiate(tile, new Vector3(x, 0.0f, z), transform.rotation);
+        // Instantiate(tile, new Vector3(x, 0.0f, z), transform.rotation);
         GameObject obj = Instantiate(tile, new Vector3(x, -0.05f, z), transform.rotation);
 
         // Set the new object parent to be the game object containing this script

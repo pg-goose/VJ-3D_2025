@@ -2,7 +2,7 @@
     <Style src="project://database/Assets/UI%20Toolkit/bloxord-styles.uss?fileID=7433441132597879392&amp;guid=f0c1b81c040d84302b31f52494b7382a&amp;type=3#bloxord-styles" />
     <ui:VisualElement name="background" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Textures/credits.png?fileID=2800000&amp;guid=ee937d42a796e587aa93d9d3dc90b0d8&amp;type=3#credits&quot;); align-content: center; align-self: auto; justify-content: center; align-items: center;">
         <ui:VisualElement name="credits-container" style="flex-grow: 0; width: 50%; height: 50%; flex-shrink: 1; align-items: center; justify-content: center; align-self: center; align-content: center;">
-            <ui:Label text="Made with tears by" style="font-size: 32px;" />
+            <ui:Label text="Made with tears by" style="font-size: 32px; color: rgb(255, 255, 255);" />
             <ui:Label text="Ana Aparicio Ortega" name="ana" class="credits-name" />
             <ui:Label text="Pau Galopa Barroso" name="pau" class="credits-name" style="-unity-font-style: bold;" />
         </ui:VisualElement>
