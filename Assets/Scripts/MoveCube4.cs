@@ -1,133 +1,238 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
+[RequireComponent(typeof(Rigidbody))]
 public class MoveCuboid : MonoBehaviour
 {
-  private Collider _collider;
+  [Header("Movement Settings")]
+  public float rotSpeed; // Rotation speed in degrees per second
 
-  private InputAction
-    _moveAction; // Input action to capture player movement (WASD + cursor keys)
+  public float fallSpeed; // Fall speed in the Y direction (currently unused)
 
-  private bool _bMoving;  // Is the object in the middle of moving?
-  private bool _bFalling; // Is the object falling?
-
-  public float rotSpeed;  // Rotation speed in degrees per second
-  public float fallSpeed; // Fall speed in the Y direction
-
-  private Vector3
-    _rotPoint,
-    _rotAxis; // Rotation movement is performed around the line formed by rotPoint and rotAxis
-
-  private float
-    _rotRemainder; // The angle that the cube still has to rotate before the current movement is completed
-
-  private float
-    _rotDir; // Has rotRemainder to be applied in the positive or negative direction?
-
-  private LayerMask _layerMask; // LayerMask to detect raycast hits with ground tiles only
-
-  public AudioClip[] sounds;  // Sounds to play when the cube rotates
+  [Header("Audio")] public AudioClip[] sounds; // Sounds to play when the cube rotates
   public AudioClip fallSound; // Sound to play when the cube starts falling
 
-  public Transform centerA, centerB;
+  [Header("Balance Points")] public Transform centerA;
+  public Transform centerB;
 
-  private bool IsGrounded() {
-    RaycastHit hit;
-    float      rayDistance = _collider.bounds.extents.y;
-    Debug.DrawLine(transform.position, transform.position + Vector3.down * rayDistance,
-                   Color.red);
+  private Collider _collider;
+  private Rigidbody _rigidbody;
+  private InputAction _moveAction;
+  private LayerMask _groundMask;
 
-    return Physics.Raycast(
-      transform.position,
-      Vector3.down,
-      out hit,
-      rayDistance + 0.1f,
-      _layerMask
-    );
-  }
+  // Rotation state
+  private bool _isRotating;
+  private Vector3 _rotationPoint;
+  private Vector3 _rotationAxis;
+  private float _remainingRotationAngle;
+  private float _rotationDirection; // +1 or -1
+  private bool _rotationStartedStanding;
 
-  private bool IsStanding() {
-    return Mathf.Abs(Mathf.Abs(centerA.position.y) - Mathf.Abs(centerB.position.y)) > 0.001f;
-  }
-  
-  private Vector3 GetRotPoint(Vector2 dir) {
-    Vector3 center  = _collider.bounds.center;  // world-space center
-    Vector3 extents = _collider.bounds.extents; // half-size in world units
-
-    switch (dir.x) {
-    case > 0.99f:
-      return new Vector3(center.x + extents.x, center.y - extents.y, center.z);
-    case < -0.99f:
-      return new Vector3(center.x - extents.x, center.y - extents.y, center.z);
-    }
-
-    switch (dir.y) {
-    case > 0.99f:
-      return new Vector3(center.x, center.y - extents.y, center.z + extents.z);
-    case < -0.99f:
-      return new Vector3(center.x, center.y - extents.y, center.z - extents.z);
-    default:
-      return center;
-    }
-  }
-
-  private void ClampPosition() {
-    Vector3 pos = transform.position;
-    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
-    pos.y = IsStanding() ? 1.0f : 0.5f;
-    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
-    transform.position = pos;
-  }
+  #region Unity Lifecycle
 
   private void Awake() {
-    _collider = GetComponent<Collider>();
+    CacheComponents();
+    SetPhysicsEnabled(false);
   }
 
   private void Start() {
     _moveAction = InputSystem.actions.FindAction("Move");
-    _layerMask  = LayerMask.GetMask("Ground");
+    _groundMask = LayerMask.GetMask("Ground");
   }
 
   private void Update() {
-    Debug.DrawLine(centerA.position, centerB.position);
-    Debug.DrawLine(transform.position, _rotPoint, Color.blue);
-
-    if (_bMoving) {
-      float amount = rotSpeed * Time.deltaTime;
-      if (amount > _rotRemainder) {
-        amount   = _rotRemainder;
-        _bMoving = false;
-      }
-
-      transform.RotateAround(_rotPoint, _rotAxis, amount * _rotDir);
-      _rotRemainder -= amount;
-      if (!_bMoving) ClampPosition();
+    DrawDebugLines();
+    if (_isRotating) {
+      RotationStep();
       return;
     }
 
-    if (!IsGrounded()) {
-      transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime), Space.World);
+    if (HandleFalling()) {
       return;
     }
-    ClampPosition();
 
+    SnapToGrid();
     Vector2 dir = _moveAction.ReadValue<Vector2>();
-    if (!(Math.Abs(dir.x) > 0.99) && !(Math.Abs(dir.y) > 0.99)) return;
-
-    _bMoving      = true;
-    _rotRemainder = 90.0f;
-
-    // Decide axis + direction
-    if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
-      _rotAxis = Vector3.forward;
-      _rotDir  = dir.x > 0 ? -1f : 1f;
-    }
-    else {
-      _rotAxis = Vector3.right;
-      _rotDir  = dir.y > 0 ? 1f : -1f;
-    }
-    _rotPoint = GetRotPoint(dir);
+    if (!HasMovementInput(dir))
+      return;
+    BeginRotation(dir);
   }
+
+  #endregion
+
+  #region Initialization
+
+  private void CacheComponents() {
+    _collider  = GetComponent<Collider>();
+    _rigidbody = GetComponent<Rigidbody>();
+  }
+
+  #endregion
+
+  #region Physics Helpers
+
+  private bool IsPhysicsEnabled() {
+    return !_rigidbody.freezeRotation && _rigidbody.useGravity;
+  }
+
+  private void SetPhysicsEnabled(bool value) {
+    _rigidbody.freezeRotation = !value;
+    _rigidbody.useGravity     = value;
+  }
+
+  #endregion
+
+  #region Grounding & Standing
+
+  private bool IsPointGrounded(Transform point, Color debugColor) {
+    RaycastHit hit;
+    float      rayDistance = _collider.bounds.extents.y * 2f;
+    Vector3    origin      = point.position;
+
+    Debug.DrawLine(origin, origin + Vector3.down * rayDistance, debugColor);
+
+    return Physics.Raycast(
+      origin,
+      Vector3.down,
+      out hit,
+      rayDistance,
+      _groundMask
+    );
+  }
+
+  private bool IsGrounded() {
+    bool centerAGrounded = IsPointGrounded(centerA, Color.red);
+    bool centerBGrounded = IsPointGrounded(centerB, Color.blue);
+    return centerAGrounded && centerBGrounded;
+  }
+
+  private bool IsStanding() {
+    return Mathf.Abs(Mathf.Abs(centerA.position.y) - Mathf.Abs(centerB.position.y)) >
+           0.001f;
+  }
+
+  #endregion
+
+  #region Movement & Rotation
+  
+  private bool HasMovementInput(Vector2 dir) {
+    return Mathf.Abs(dir.x) > 0.99f || Mathf.Abs(dir.y) > 0.99f;
+  }
+
+  private void BeginRotation(Vector2 dir) {
+    _isRotating              = true;
+    _remainingRotationAngle  = 90f;
+    _rotationStartedStanding = IsStanding();
+    
+    // Setup rotation axis and direction
+    if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
+      _rotationAxis      = Vector3.forward;
+      _rotationDirection = dir.x > 0 ? -1f : 1f;
+    } else {
+      _rotationAxis      = Vector3.right;
+      _rotationDirection = dir.y > 0 ? 1f : -1f;
+    }
+    _rotationPoint = GetRotationPoint(dir);
+  }
+
+  private Vector3 GetRotationPoint(Vector2 dir) {
+    Vector3 center  = _collider.bounds.center;  // world-space center
+    Vector3 extents = _collider.bounds.extents; // half-size in world units
+
+    if (dir.x > 0.99f)
+      return new Vector3(center.x + extents.x, center.y - extents.y, center.z);
+    if (dir.x < -0.99f)
+      return new Vector3(center.x - extents.x, center.y - extents.y, center.z);
+
+    if (dir.y > 0.99f)
+      return new Vector3(center.x, center.y - extents.y, center.z + extents.z);
+    if (dir.y < -0.99f)
+      return new Vector3(center.x, center.y - extents.y, center.z - extents.z);
+
+    return center;
+  }
+
+  private void RotationStep() {
+    float step = rotSpeed * Time.deltaTime;
+
+    if (step > _remainingRotationAngle)
+      step = _remainingRotationAngle;
+    
+    transform.RotateAround(_rotationPoint, _rotationAxis, step * _rotationDirection);
+    _remainingRotationAngle -= step;
+    
+    if (!_rotationStartedStanding && !IsGrounded()) {
+      StartFalling();
+      return;
+    }
+    if (_remainingRotationAngle <= 0f) {
+      _isRotating = false;
+      SnapToGrid();
+    }
+  }
+
+  private bool HandleFalling() {
+    if (!IsGrounded()) {
+      StartFalling();
+      return true;
+    }
+
+    if (IsPhysicsEnabled())
+      SetPhysicsEnabled(false);
+
+    return false;
+  }
+  
+  private void AdjustCenterOfMass() {
+    if (!IsPointGrounded(centerA, Color.red))
+      _rigidbody.centerOfMass = centerA.localPosition;
+
+    if (!IsPointGrounded(centerB, Color.blue))
+      _rigidbody.centerOfMass = centerB.localPosition;
+  }
+
+  private void StartFalling() {
+    _isRotating = false;
+    SetPhysicsEnabled(true);
+    
+    // not rotating, no direction to continue in
+    if (_rotationAxis == Vector3.zero || Mathf.Approximately(rotSpeed, 0f))
+      return;
+
+    float radiansPerSecond = rotSpeed * Mathf.Deg2Rad * _rotationDirection;
+    _rigidbody.angularVelocity = _rotationAxis.normalized * radiansPerSecond;
+
+    AdjustCenterOfMass();
+    if (fallSound) {
+      AudioSource.PlayClipAtPoint(fallSound, transform.position);
+    }
+  }
+
+  #endregion
+
+  #region Positioning
+
+  private void SnapToGrid() {
+    Vector3 pos = transform.position;
+
+    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
+    pos.y = IsStanding() ? 1.0f : 0.5f;
+    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
+
+    transform.position = pos;
+  }
+
+  #endregion
+
+  #region Debug
+
+  private void DrawDebugLines() {
+    Debug.DrawLine(centerA.position, centerB.position);
+    if (_isRotating) {
+      Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
+    }
+  }
+
+  #endregion
 }
