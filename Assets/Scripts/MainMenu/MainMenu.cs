@@ -22,7 +22,7 @@ public class MainMenu : MonoBehaviour
   }
 
   private void StartGame() {
-    GameManager.Instance.LoadLevel(0);
+    GameManager.Instance.LoadLevel(1);
   }
 
   private void Credits() {

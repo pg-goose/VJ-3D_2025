@@ -33,15 +33,17 @@ public class GameManager : MonoBehaviour
   }
 
   private string LevelName(int level) {
-    return Level + "${level}";
+    return Level + level;
   }
   
   public void LoadLevel(int level) {
     CurrentLevel = level;
+    
     SceneManager.LoadScene(LevelName(level), LoadSceneMode.Single);
   }
 
   public void LoadCredits() {
     SceneManager.LoadScene(Credits, LoadSceneMode.Single);
   }
+
 }
