@@ -3,72 +3,41 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
-[RequireComponent(typeof(Rigidbody))]
 public class MoveCuboid : MonoBehaviour
 {
-  private float _timeSinceLastMove = 0f;
   private Collider _collider;
-  private Rigidbody _rigidbody;
-  private bool _bFallingWithPhysics;
 
-  private InputAction _moveAction;
+  private InputAction
+    _moveAction; // Input action to capture player movement (WASD + cursor keys)
 
-  private bool _bMoving;
-  private bool _bFalling;
+  private bool _bMoving;  // Is the object in the middle of moving?
+  private bool _bFalling; // Is the object falling?
 
-  public float rotSpeed;
-  public float fallSpeed;
+  public float rotSpeed;  // Rotation speed in degrees per second
+  public float fallSpeed; // Fall speed in the Y direction
 
-  private Vector3 _rotPoint, _rotAxis;
-  private float _rotRemainder;
-  private float _rotDir;
+  private Vector3
+    _rotPoint,
+    _rotAxis; // Rotation movement is performed around the line formed by rotPoint and rotAxis
 
-  private LayerMask _layerMask;
+  private float
+    _rotRemainder; // The angle that the cube still has to rotate before the current movement is completed
 
-  public AudioClip[] sounds;
-  public AudioClip fallSound;
+  private float
+    _rotDir; // Has rotRemainder to be applied in the positive or negative direction?
+
+  private LayerMask _layerMask; // LayerMask to detect raycast hits with ground tiles only
+
+  public AudioClip[] sounds;  // Sounds to play when the cube rotates
+  public AudioClip fallSound; // Sound to play when the cube starts falling
 
   public Transform centerA, centerB;
-  
-  private bool IsPartiallyOffEdge() {
-    if (_bMoving) return false; // CRÍTICO: No verificar durante el movimiento
-    if (_bFallingWithPhysics) return false; // AÑADIDO: No verificar si ya está cayendo
-
-    bool centerAGrounded = CheckCenterGrounded(centerA.position);
-    bool centerBGrounded = CheckCenterGrounded(centerB.position);
-  
-    if (centerAGrounded != centerBGrounded) {
-      if (IsStanding()) {
-        Vector3 lowerCenter = centerA.position.y < centerB.position.y ? centerA.position : centerB.position;
-        return !CheckCenterGrounded(lowerCenter);
-      }
-      return true;
-    }
-
-    return false;
-  }
-  
-  private bool CheckCenterGrounded(Vector3 position) {
-    RaycastHit hit;
-    float rayDistance = IsStanding() ? 1.5f : 0.6f;
-  
-    Debug.DrawLine(position, position + Vector3.down * rayDistance, Color.yellow);
-  
-    return Physics.Raycast(
-      position,
-      Vector3.down,
-      out hit,
-      rayDistance,
-      _layerMask
-    );
-  }
 
   private bool IsGrounded() {
-    if (_bFallingWithPhysics) return false; // AÑADIDO: No verificar si está cayendo con física
-    
     RaycastHit hit;
-    float rayDistance = _collider.bounds.extents.y;
-    Debug.DrawLine(transform.position, transform.position + Vector3.down * rayDistance, Color.red);
+    float      rayDistance = _collider.bounds.extents.y;
+    Debug.DrawLine(transform.position, transform.position + Vector3.down * rayDistance,
+                   Color.red);
 
     return Physics.Raycast(
       transform.position,
@@ -84,8 +53,8 @@ public class MoveCuboid : MonoBehaviour
   }
   
   private Vector3 GetRotPoint(Vector2 dir) {
-    Vector3 center  = _collider.bounds.center;
-    Vector3 extents = _collider.bounds.extents;
+    Vector3 center  = _collider.bounds.center;  // world-space center
+    Vector3 extents = _collider.bounds.extents; // half-size in world units
 
     switch (dir.x) {
     case > 0.99f:
@@ -114,14 +83,6 @@ public class MoveCuboid : MonoBehaviour
 
   private void Awake() {
     _collider = GetComponent<Collider>();
-    _rigidbody = GetComponent<Rigidbody>(); // CORREGIDO: Faltaba esta línea
-    
-    // Configurar rigidbody
-    _rigidbody.isKinematic = true;
-    _rigidbody.useGravity = false;
-    _rigidbody.interpolation = RigidbodyInterpolation.Interpolate; // Suavizar movimiento
-    
-    // Sin constraints por ahora, para que caiga libremente
   }
 
   private void Start() {
@@ -129,47 +90,11 @@ public class MoveCuboid : MonoBehaviour
     _layerMask  = LayerMask.GetMask("Ground");
   }
 
-  private void StartPhysicsFall() {
-    if (_bFallingWithPhysics) return;
-  
-    _bFallingWithPhysics = true;
-    _bMoving = false;
-  
-    // Activar física
-    _rigidbody.isKinematic = false;
-    _rigidbody.useGravity = true;
-  
-    // Aplicar torque para que rote al caer
-    Vector3 fallDirection = GetFallDirection();
-    _rigidbody.AddTorque(fallDirection * 3f, ForceMode.Impulse);
-  
-    Debug.Log("Cube falling with physics!");
-    
-    // Opcional: Reiniciar después de 3 segundos
-    // Invoke(nameof(ResetCube), 3f);
-  }
-
-  private Vector3 GetFallDirection() {
-    bool centerAGrounded = CheckCenterGrounded(centerA.position);
-  
-    if (!centerAGrounded) {
-      Vector3 dirToA = (centerA.position - centerB.position).normalized;
-      return Vector3.Cross(dirToA, Vector3.up);
-    } else {
-      Vector3 dirToB = (centerB.position - centerA.position).normalized;
-      return Vector3.Cross(dirToB, Vector3.up);
-    }
-  }
-  
   private void Update() {
-    if (_bFallingWithPhysics) return;
-    
     Debug.DrawLine(centerA.position, centerB.position);
     Debug.DrawLine(transform.position, _rotPoint, Color.blue);
-    
+
     if (_bMoving) {
-      _timeSinceLastMove = 0f;
-      
       float amount = rotSpeed * Time.deltaTime;
       if (amount > _rotRemainder) {
         amount   = _rotRemainder;
@@ -181,18 +106,11 @@ public class MoveCuboid : MonoBehaviour
       if (!_bMoving) ClampPosition();
       return;
     }
-    _timeSinceLastMove += Time.deltaTime;
 
-    if (_timeSinceLastMove > 0.1f && IsPartiallyOffEdge()) {
-      StartPhysicsFall(); 
-      return;
-    }
-  
     if (!IsGrounded()) {
       transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime), Space.World);
       return;
     }
-    
     ClampPosition();
 
     Vector2 dir = _moveAction.ReadValue<Vector2>();
@@ -201,6 +119,7 @@ public class MoveCuboid : MonoBehaviour
     _bMoving      = true;
     _rotRemainder = 90.0f;
 
+    // Decide axis + direction
     if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
       _rotAxis = Vector3.forward;
       _rotDir  = dir.x > 0 ? -1f : 1f;
