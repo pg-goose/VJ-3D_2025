@@ -7,6 +7,7 @@ public class MoveCuboid : MonoBehaviour
 {
   [Header("Movement Settings")]
   public float rotSpeed; // Rotation speed in degrees per second
+
   public float fallSpeed; // Fall speed in the Y direction (currently unused)
 
   [Header("Audio")] public AudioClip[] sounds; // Sounds to play when the cube rotates
@@ -16,17 +17,42 @@ public class MoveCuboid : MonoBehaviour
   public Transform centerB;
 
   private Collider _collider;
-  private Rigidbody _rigidbody;
-  private InputAction _moveAction;
   private LayerMask _groundMask;
 
   // rotation
   private bool _isRotating;
-  private Vector3 _rotationPoint;
-  private Vector3 _rotationAxis;
+  private InputAction _moveAction;
   private float _remainingRotationAngle;
+  private Rigidbody _rigidbody;
+  private Vector3 _rotationAxis;
   private float _rotationDirection; // +1 or -1
+  private Vector3 _rotationPoint;
   private bool _rotationStartedStanding;
+
+  private bool _spawning = true;
+
+  #region Positioning
+
+  private void SnapToGrid() {
+    Vector3 pos = transform.position;
+
+    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
+    pos.y = IsStanding() ? 1.0f : 0.5f;
+    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
+
+    transform.position = pos;
+  }
+
+  #endregion
+
+  #region Debug
+
+  private void DrawDebugLines() {
+    Debug.DrawLine(centerA.position, centerB.position);
+    if (_isRotating) Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
+  }
+
+  #endregion
 
   #region Unity
 
@@ -43,16 +69,18 @@ public class MoveCuboid : MonoBehaviour
 
   private void Update() {
     DrawDebugLines();
-    if (_isRotating) {
+    if (_isRotating && !_spawning) {
       RotationStep();
       return;
     }
 
-    if (HandleFalling()) {
-      return;
+    if (HandleFalling()) return;
+    SnapToGrid();
+    if (_spawning) {
+      _spawning = false;
+      return; // early exit to avoid player moving when snapping to the grid after falling
     }
 
-    SnapToGrid();
     Vector2 dir = _moveAction.ReadValue<Vector2>();
     if (!HasMovementInput(dir))
       return;
@@ -106,7 +134,7 @@ public class MoveCuboid : MonoBehaviour
   #endregion
 
   #region Movement & Rotation
-  
+
   private bool HasMovementInput(Vector2 dir) {
     return Mathf.Abs(dir.x) > 0.99f || Mathf.Abs(dir.y) > 0.99f;
   }
@@ -115,15 +143,17 @@ public class MoveCuboid : MonoBehaviour
     _isRotating              = true;
     _remainingRotationAngle  = 90f;
     _rotationStartedStanding = IsStanding();
-    
+
     // set rotation axis and direction
     if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
       _rotationAxis      = Vector3.forward;
       _rotationDirection = dir.x > 0 ? -1f : 1f;
-    } else {
+    }
+    else {
       _rotationAxis      = Vector3.right;
       _rotationDirection = dir.y > 0 ? 1f : -1f;
     }
+
     _rotationPoint = GetRotationPoint(dir);
   }
 
@@ -149,14 +179,15 @@ public class MoveCuboid : MonoBehaviour
 
     if (step > _remainingRotationAngle)
       step = _remainingRotationAngle;
-    
+
     transform.RotateAround(_rotationPoint, _rotationAxis, step * _rotationDirection);
     _remainingRotationAngle -= step;
-    
+
     if (!_rotationStartedStanding && !IsGrounded()) {
       StartFalling();
       return;
     }
+
     if (_remainingRotationAngle <= 0f) {
       _isRotating = false;
       SnapToGrid();
@@ -174,7 +205,7 @@ public class MoveCuboid : MonoBehaviour
 
     return false;
   }
-  
+
   private void AdjustCenterOfMass() {
     if (!IsPointGrounded(centerA, Color.red))
       _rigidbody.centerOfMass = centerA.localPosition;
@@ -185,8 +216,13 @@ public class MoveCuboid : MonoBehaviour
 
   private void StartFalling() {
     _isRotating = false;
+    if (_spawning) {
+      _rigidbody.useGravity = true;
+      return;
+    }
+
     SetPhysicsEnabled(true);
-    
+
     // not rotating, no direction to continue in
     if (_rotationAxis == Vector3.zero || Mathf.Approximately(rotSpeed, 0f))
       return;
@@ -195,34 +231,7 @@ public class MoveCuboid : MonoBehaviour
     _rigidbody.angularVelocity = _rotationAxis.normalized * radiansPerSecond;
 
     AdjustCenterOfMass();
-    if (fallSound) {
-      AudioSource.PlayClipAtPoint(fallSound, transform.position);
-    }
-  }
-
-  #endregion
-
-  #region Positioning
-
-  private void SnapToGrid() {
-    Vector3 pos = transform.position;
-
-    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
-    pos.y = IsStanding() ? 1.0f : 0.5f;
-    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
-
-    transform.position = pos;
-  }
-
-  #endregion
-
-  #region Debug
-
-  private void DrawDebugLines() {
-    Debug.DrawLine(centerA.position, centerB.position);
-    if (_isRotating) {
-      Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
-    }
+    if (fallSound) AudioSource.PlayClipAtPoint(fallSound, transform.position);
   }
 
   #endregion

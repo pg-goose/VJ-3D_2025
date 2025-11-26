@@ -3,19 +3,18 @@ using UnityEngine.UIElements;
 
 public class MainMenu : MonoBehaviour
 {
-  [SerializeField] private UIDocument mainMenuDocument;
-
   private const string StartGameButtonName = "start-game-button";
   private const string CreditsButtonName = "credits-button";
-  
-  private Button _startGameButton;
+  [SerializeField] private UIDocument mainMenuDocument;
   private Button _creditsButton;
-  
+
+  private Button _startGameButton;
+
   private void Awake() {
     VisualElement root = mainMenuDocument.rootVisualElement;
 
     _startGameButton = root.Q<Button>(StartGameButtonName);
-    _creditsButton = root.Q<Button>(CreditsButtonName);
+    _creditsButton   = root.Q<Button>(CreditsButtonName);
 
     _startGameButton.clicked += StartGame;
     _creditsButton.clicked   += Credits;
@@ -28,5 +27,4 @@ public class MainMenu : MonoBehaviour
   private void Credits() {
     GameManager.Instance.LoadCredits();
   }
-  
 }
