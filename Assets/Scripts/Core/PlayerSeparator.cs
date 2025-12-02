@@ -34,20 +34,17 @@ public class PlayerSeparator : MonoBehaviour
 
   private void OnTriggerStay(Collider other) {
     Vector3 colliderPos = other.transform.position;
-    Vector3 playerPos   = transform.position;
+    Vector3 playerPosA  = centerA.position;
+    Vector3 playerPosB   = centerB.position;
       
-    bool onTop = Mathf.Approximately(colliderPos.x, playerPos.x);
-    onTop |= Mathf.Approximately(colliderPos.z, playerPos.z);
+    bool onTop = Mathf.Approximately(colliderPos.x, playerPosA.x) && Mathf.Approximately(colliderPos.z, playerPosA.z);
+    onTop |= Mathf.Approximately(colliderPos.x, playerPosB.x) && Mathf.Approximately(colliderPos.z, playerPosB.z);
 
     // Check if we hit a separator tile and we're not already separated
     if (_isSeparated) return;
 
-    if (other.CompareTag("Separator")) {
-
-    
-      if (onTop) {
+    if (other.CompareTag("Separator") && onTop) {    
         SeparatePlayer();
-      }
     }
   }
 
