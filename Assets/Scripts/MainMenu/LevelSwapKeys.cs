@@ -20,12 +20,10 @@ public class LevelSwapKeys : MonoBehaviour
     foreach (KeyCode key in _keys)
       if (Input.GetKeyDown(key))
         pressedNumber = (int)key;
-
     if (pressedNumber.HasValue) {
       GameManager.Instance.LoadLevel(pressedNumber.Value);
       return;
     }
-
     if (Input.GetKeyDown(KeyCode.Escape)) GameManager.Instance.LoadMainMenu();
   }
 }

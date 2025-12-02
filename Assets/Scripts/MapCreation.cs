@@ -12,6 +12,14 @@ public class MapCreation : MonoBehaviour
   #region Unity
 
   private void Start() {
+    CreateMap();
+  }
+
+  #endregion
+
+  #region Public API
+
+  public void CreateMap() {
     if (!IsConfigValid()) return;
 
     int[] mapNumbers = ParseMap(map.text);

@@ -74,6 +74,7 @@ GameObject:
   - component: {fileID: 1762064661065020349}
   - component: {fileID: 4662619089792285689}
   - component: {fileID: 8226212933532624311}
+  - component: {fileID: 7713788704041585213}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -165,6 +166,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7713788704041585213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049392329886490164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c9e7f4a8d3b6e1f9c5a8d2e7b4f6a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSeparator
+  cubePrefab: {fileID: 6500309188609885533, guid: 0fa71dba8d83beebb965923fd91b5427, type: 3}
+  centerA: {fileID: 0}
+  centerB: {fileID: 0}
+  separationSound: {fileID: 0}
 --- !u!1001 &3046221307105294731
 PrefabInstance:
   m_ObjectHideFlags: 0
