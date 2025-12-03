@@ -35,11 +35,9 @@ public class MoveCuboid : MonoBehaviour
 
   private void SnapToGrid() {
     Vector3 pos = transform.position;
-
     pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
     pos.y = IsStanding() ? 1.0f : 0.5f;
     pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
-
     transform.position = pos;
   }
 

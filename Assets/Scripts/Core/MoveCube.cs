@@ -32,7 +32,9 @@ public class MoveCube : MonoBehaviour
   // State
   private bool _isActive;
   private MoveCube _otherCube;
+  private PlayerSeparator _playerSeparator;
   private bool _spawning = true;
+  private bool _switchHandledThisFrame;
 
   #region Unity Methods
 
@@ -49,31 +51,28 @@ public class MoveCube : MonoBehaviour
   }
 
   private void Update() {
-    // Handle switching between cubes
-    if (_switchAction != null && _switchAction.WasPressedThisFrame()) {
-      SwitchActive();
-      return;
+    // Handle switching between cubes (both cubes need to check this)
+    if (_switchAction.WasPressedThisFrame() && _isActive && !_switchHandledThisFrame) {
+        _isActive = false;
+        _otherCube.SetActive(true);
     }
-
-    // Only the active cube can move
+    _switchHandledThisFrame = false;
+    
+    // Only the active cube handles movement
     if (!_isActive) return;
-
+    
     if (_isRotating && !_spawning) {
       RotationStep();
       return;
     }
-
     if (HandleFalling()) return;
     SnapToGrid();
-
     if (_spawning) {
       _spawning = false;
       return;
     }
-
     Vector2 dir = _moveAction.ReadValue<Vector2>();
     if (!HasMovementInput(dir)) return;
-
     BeginRotation(dir);
   }
 
@@ -82,11 +81,16 @@ public class MoveCube : MonoBehaviour
   #region Public API
 
   public void SetActive(bool active) {
-    _isActive = active;
+    _isActive               = active;
+    _switchHandledThisFrame = true;
   }
 
   public void SetOtherCube(MoveCube other) {
     _otherCube = other;
+  }
+
+  public void SetPlayerSeparator(PlayerSeparator separator) {
+    _playerSeparator = separator;
   }
 
   public bool IsActive() {
@@ -94,18 +98,7 @@ public class MoveCube : MonoBehaviour
   }
 
   #endregion
-
-  #region Switching
-
-  private void SwitchActive() {
-    if (_otherCube != null && !_isRotating && !_otherCube._isRotating) {
-      _isActive = false;
-      _otherCube.SetActive(true);
-    }
-  }
-
-  #endregion
-
+  
   #region Positioning
 
   private void SnapToGrid() {
@@ -114,6 +107,9 @@ public class MoveCube : MonoBehaviour
     pos.y = 0.5f; // Cubes are always at height 0.5
     pos.z = Mathf.Round(pos.z);
     transform.position = pos;
+    
+    Quaternion rot = transform.rotation;
+    transform.rotation = Quaternion.Euler(rot.x, 0f, rot.z);
   }
 
   #endregion
@@ -239,6 +235,13 @@ public class MoveCube : MonoBehaviour
     if (_remainingRotationAngle <= 0f) {
       _isRotating = false;
       SnapToGrid();
+      CheckForMerge();
+    }
+  }
+
+  private void CheckForMerge() {
+    if (_playerSeparator != null && _playerSeparator.IsSeparated()) {
+      _playerSeparator.MergeCubes();
     }
   }
 
