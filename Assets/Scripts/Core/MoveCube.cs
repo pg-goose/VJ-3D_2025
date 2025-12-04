@@ -1,5 +1,9 @@
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 /// <summary>
 /// Controls movement for a single cube when the player is separated.
@@ -11,6 +15,8 @@ public class MoveCube : MonoBehaviour
 {
   [Header("Movement Settings")]
   public float rotSpeed = 180f;
+
+  public bool lockUp = false;
 
   [Header("Audio")]
   public AudioClip[] sounds;
@@ -72,6 +78,7 @@ public class MoveCube : MonoBehaviour
       return;
     }
     Vector2 dir = _moveAction.ReadValue<Vector2>();
+    dir = lockUp ? Vector2.up : dir; 
     if (!HasMovementInput(dir)) return;
     BeginRotation(dir);
   }
@@ -235,14 +242,14 @@ public class MoveCube : MonoBehaviour
     if (_remainingRotationAngle <= 0f) {
       _isRotating = false;
       SnapToGrid();
-      CheckForMerge();
+      if (_playerSeparator && _playerSeparator.IsSeparated()) {
+        _playerSeparator.MergeCubes();
+      }
     }
   }
 
   private void CheckForMerge() {
-    if (_playerSeparator != null && _playerSeparator.IsSeparated()) {
-      _playerSeparator.MergeCubes();
-    }
+
   }
 
   #endregion

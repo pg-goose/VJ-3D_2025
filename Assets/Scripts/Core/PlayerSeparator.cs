@@ -38,59 +38,60 @@ public class PlayerSeparator : MonoBehaviour
       
     bool aOnTop = MathUtils.Approximately(colliderPos.x, playerPosA.x) && MathUtils.Approximately(colliderPos.z, playerPosA.z);
     bool bOnTop = MathUtils.Approximately(colliderPos.x, playerPosB.x) && MathUtils.Approximately(colliderPos.z, playerPosB.z);
-    bool onTop = aOnTop || bOnTop;
-    if (!onTop) return; // early exit
-    if (aOnTop && bOnTop) { // cuboid is standing
-      aOnTop = playerPosA.y < playerPosB.y;
-      bOnTop = playerPosB.y < playerPosA.y; // unused
-    }
-    if (other.CompareTag("Separator") && !_isSeparated) {    
-        SeparatePlayer(aOnTop);
+    bool standing = aOnTop && bOnTop;
+    if (standing && !_isSeparated && other.CompareTag("Separator")) {    
+        SeparatePlayer();
     }
   }
   
-  private void SeparatePlayer(bool aOnButton) {
-    if (cubePrefab == null) {
+  private void SeparatePlayer() {
+    if (!cubePrefab) {
       Debug.LogError("PlayerSeparator: Cube prefab not assigned!");
       return;
     }
     _isSeparated = true;
     _moveCuboid.enabled = false;
-
-    CreateSeparatedCubes(aOnButton);
+    CreateSeparatedCubes();
     HideCuboid();
   }
 
-  private void CreateSeparatedCubes(bool aOnButton) {
-    // Cube A at centerA position (current position of the active half)
-    _cubeA = Instantiate(cubePrefab, centerA.position, Quaternion.identity);
-    _cubeA.transform.parent = transform.parent;
-    _moveCubeA = _cubeA.GetComponent<MoveCube>();
-
-    // Cube B at original spawn position
+  private void CreateSeparatedCubes() {
     Vector3 spawnPos = _originalSpawnPosition;
-    spawnPos.y = 0.5f; // Ensure proper height for a cube
-    _cubeB = Instantiate(cubePrefab, spawnPos, Quaternion.identity);
+    spawnPos.y = .5f;
+    _cubeA = Instantiate(
+      cubePrefab,
+      spawnPos,
+      Quaternion.identity
+    );
+    _cubeA.transform.parent = transform.parent;
+    _cubeA.name             = "CubeA";
+    _moveCubeA              = _cubeA.GetComponent<MoveCube>();
+
+    Vector3 posB = centerB.transform.position;
+    posB.y = .5f;
+    _cubeB = Instantiate(
+      cubePrefab,
+      posB,
+      Quaternion.identity
+    );
     _cubeB.transform.parent = transform.parent;
-    _moveCubeB = _cubeB.GetComponent<MoveCube>();
+    _cubeB.name             = "CubeB";
+    _moveCubeB              = _cubeB.GetComponent<MoveCube>();
 
     if (!_moveCubeA || !_moveCubeB) return;
     
     // Link the cubes together so they know about each other
     _moveCubeA.SetOtherCube(_moveCubeB);
     _moveCubeB.SetOtherCube(_moveCubeA);
-
     // Give cubes reference to this separator for merging
     _moveCubeA.SetPlayerSeparator(this);
     _moveCubeB.SetPlayerSeparator(this);
-
     // Copy rotation speed from the cuboid
     _moveCubeA.rotSpeed = _moveCuboid.rotSpeed;
     _moveCubeB.rotSpeed = _moveCuboid.rotSpeed;
-
     // Set one as active (A), one as inactive (B)
-    _moveCubeA.SetActive(aOnButton);
-    _moveCubeB.SetActive(!aOnButton);
+    _moveCubeA.SetActive(false);
+    _moveCubeB.SetActive(true);
   }
 
   private void HideCuboid() {
@@ -111,33 +112,31 @@ public class PlayerSeparator : MonoBehaviour
   public void MergeCubes() {
     Vector3 posA = _cubeA.transform.position;
     Vector3 posB = _cubeB.transform.position;
-    float distance = Vector3.Distance(posA, posB);
 
-    if (Mathf.Abs(distance - 1.0f) < 0.1f) {
+    if (MathUtils.Approximately(Vector3.Distance(posA, posB), 1.0f, 0.001f)) {
       RestoreCuboid(posA, posB);
     }
   }
 
   private void RestoreCuboid(Vector3 posA, Vector3 posB) {
-    // 1. Compute where the cuboid should be (world space)
+    // where the cuboid should be
     Vector3 center = (posA + posB) * 0.5f;
 
-    // 2. Compute direction of the long axis in world space
     Vector3 dir = posB - posA;
-    dir.y = 0f;                       // should already be flat, but just in case
+    dir.y = 0f;
 
     if (dir.sqrMagnitude > 0.0001f) { // avoid zero-length just in case
-      // We want the cuboid's local Y (up) to align with the vector between the cubes.
       var rot = Quaternion.FromToRotation(Vector3.up, dir.normalized);
       transform.SetPositionAndRotation(center, rot);
     } else {
-      // Fallback: cubes somehow in the same spot -> just stand upright in the middle
       transform.position = center;
       transform.rotation = Quaternion.identity;
     }
-    // 3. Re-enable visuals & collider, clean up cubes
+    // re-enable visuals & collider, clean up cubes
+    if (_cubeA) Destroy(_cubeA);
+    if (_cubeB) Destroy(_cubeB);
     MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-    if (meshRenderer != null) {
+    if (meshRenderer) {
       meshRenderer.enabled = true;
     }
     MeshRenderer[] childRenderers = GetComponentsInChildren<MeshRenderer>(true);
@@ -148,13 +147,11 @@ public class PlayerSeparator : MonoBehaviour
     if (colliderComp) {
       colliderComp.enabled = true;
     }
-    if (_cubeA) Destroy(_cubeA);
-    if (_cubeB) Destroy(_cubeB);
     _isSeparated        = false;
     _moveCuboid.enabled = true;
+    _moveCuboid.SetSpawning(true);
   }
-
-
+  
   public bool IsSeparated() {
     return _isSeparated;
   }

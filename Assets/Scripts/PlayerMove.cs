@@ -9,6 +9,8 @@ public class MoveCuboid : MonoBehaviour
   public float rotSpeed; // Rotation speed in degrees per second
 
   public float fallSpeed; // Fall speed in the Y direction (currently unused)
+  
+  public bool lockUp = false;
 
   [Header("Audio")] public AudioClip[] sounds; // Sounds to play when the cube rotates
   public AudioClip fallSound; // Sound to play when the cube starts falling
@@ -31,17 +33,7 @@ public class MoveCuboid : MonoBehaviour
 
   private bool _spawning = true;
 
-  #region Positioning
 
-  private void SnapToGrid() {
-    Vector3 pos = transform.position;
-    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
-    pos.y = IsStanding() ? 1.0f : 0.5f;
-    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
-    transform.position = pos;
-  }
-
-  #endregion
 
   #region Debug
 
@@ -71,15 +63,14 @@ public class MoveCuboid : MonoBehaviour
       RotationStep();
       return;
     }
-
     if (HandleFalling()) return;
     SnapToGrid();
     if (_spawning) {
       _spawning = false;
       return; // early exit to avoid player moving when snapping to the grid after falling
     }
-
-    Vector2 dir = _moveAction.ReadValue<Vector2>();
+    Vector2 dir     = _moveAction.ReadValue<Vector2>();
+    if (lockUp) dir = Vector2.up;
     if (!HasMovementInput(dir))
       return;
     BeginRotation(dir);
@@ -87,6 +78,22 @@ public class MoveCuboid : MonoBehaviour
 
   #endregion
 
+  public void SetSpawning(bool value) {
+    _spawning = value;
+  }
+  
+  #region Positioning
+
+  private void SnapToGrid() {
+    Vector3 pos = transform.position;
+    pos.x              = Mathf.Round(pos.x * 2.0f) / 2.0f;
+    pos.y              = IsStanding() ? 1.0f : 0.5f;
+    pos.z              = Mathf.Round(pos.z * 2.0f) / 2.0f;
+    transform.position = pos;
+  }
+
+  #endregion
+  
   #region Physics Helpers
 
   private bool IsPhysicsEnabled() {
@@ -151,7 +158,6 @@ public class MoveCuboid : MonoBehaviour
       _rotationAxis      = Vector3.right;
       _rotationDirection = dir.y > 0 ? 1f : -1f;
     }
-
     _rotationPoint = GetRotationPoint(dir);
   }
 
