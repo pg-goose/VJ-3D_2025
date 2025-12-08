@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FragileTrigger : OnStandingTrigger  {
+public class FragileTrigger : MonoBehaviour  {
   private Collider _collider;
   private bool _broken = false;
 
@@ -8,11 +8,5 @@ public class FragileTrigger : OnStandingTrigger  {
     _collider = GetComponent<Collider>();
   }
   
-  public override void OnTriggerStay(Collider other) {
-    if (_broken) return;
-    if  (!StandingOnCollider(other)) return;
-    if (!other.CompareTag("Player")) return;
-    _broken           = true;
-    _collider.enabled = false;
-  }
+  public void OnTriggerStay(Collider other) {}
 }

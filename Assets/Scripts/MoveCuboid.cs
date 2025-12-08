@@ -9,7 +9,7 @@ public class MoveCuboid : MonoBehaviour
   public float rotSpeed; // Rotation speed in degrees per second
 
   public float fallSpeed; // Fall speed in the Y direction (currently unused)
-  
+
   public bool lockUp = false;
 
   [Header("Audio")] public AudioClip[] sounds; // Sounds to play when the cube rotates
@@ -32,6 +32,7 @@ public class MoveCuboid : MonoBehaviour
   private bool _rotationStartedStanding;
 
   private bool _spawning = true;
+  public bool FallStraight { get; set; }
 
 
   #region Debug
@@ -62,12 +63,14 @@ public class MoveCuboid : MonoBehaviour
       RotationStep();
       return;
     }
+
     if (HandleFalling()) return;
     SnapToGrid();
     if (_spawning) {
       _spawning = false;
       return; // early exit to avoid player moving when snapping to the grid after falling
     }
+
     Vector2 dir     = _moveAction.ReadValue<Vector2>();
     if (lockUp) dir = Vector2.up;
     if (!HasMovementInput(dir))
@@ -80,7 +83,7 @@ public class MoveCuboid : MonoBehaviour
   public void SetSpawning(bool value) {
     _spawning = value;
   }
-  
+
   #region Positioning
 
   private void SnapToGrid() {
@@ -92,7 +95,7 @@ public class MoveCuboid : MonoBehaviour
   }
 
   #endregion
-  
+
   #region Physics Helpers
 
   private bool IsPhysicsEnabled() {
@@ -157,6 +160,7 @@ public class MoveCuboid : MonoBehaviour
       _rotationAxis      = Vector3.right;
       _rotationDirection = dir.y > 0 ? 1f : -1f;
     }
+
     _rotationPoint = GetRotationPoint(dir);
   }
 
@@ -219,8 +223,9 @@ public class MoveCuboid : MonoBehaviour
 
   private void StartFalling() {
     _isRotating = false;
-    if (_spawning) {
-      _rigidbody.useGravity = true;
+    if (_spawning || FallStraight) {
+      _rigidbody.useGravity     = true;
+      _rigidbody.freezeRotation = true;
       return;
     }
 
