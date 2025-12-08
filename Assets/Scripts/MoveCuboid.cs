@@ -6,31 +6,31 @@ using UnityEngine.InputSystem;
 public class MoveCuboid : MonoBehaviour
 {
   [Header("Movement Settings")]
-  public float rotSpeed; // Rotation speed in degrees per second
+  public float rotSpeed;
+  public float fallSpeed;
 
-  public float fallSpeed; // Fall speed in the Y direction (currently unused)
+  [Header("Audio")]
+  public AudioClip[] sounds;
+  public AudioClip fallSound;
 
-  public bool lockUp = false;
-
-  [Header("Audio")] public AudioClip[] sounds; // Sounds to play when the cube rotates
-  public AudioClip fallSound; // Sound to play when the cube starts falling
-
-  [Header("Balance Points")] public Transform centerA;
+  [Header("Balance Points")]
+  public Transform centerA;
   public Transform centerB;
 
   private Collider _collider;
   private LayerMask _groundMask;
+  private Rigidbody _rigidbody;
+  private InputAction _moveAction;
 
   // rotation
   private bool _isRotating;
-  private InputAction _moveAction;
   private float _remainingRotationAngle;
-  private Rigidbody _rigidbody;
   private Vector3 _rotationAxis;
-  private float _rotationDirection; // +1 or -1
+  private float _rotationDirection;
   private Vector3 _rotationPoint;
   private bool _rotationStartedStanding;
 
+  // state
   private bool _spawning = true;
   public bool FallStraight { get; set; }
 
@@ -43,6 +43,7 @@ public class MoveCuboid : MonoBehaviour
   }
 
   #endregion
+  private bool _hasFallenOffWorld = false;
 
   #region Unity
 
@@ -59,23 +60,84 @@ public class MoveCuboid : MonoBehaviour
 
   private void Update() {
     DrawDebugLines();
-    if (_isRotating && !_spawning) {
+
+    if (transform.position.y < -10f && !_hasFallenOffWorld) {
+      _hasFallenOffWorld = true;
+      Debug.Log("[MoveCuboid] Cayó al vacío. Notificando reinicio...");
+      
+      if (LevelManager.Instance != null) {
+        LevelManager.Instance.NotifyPlayerFell();
+      }
+      return; 
+    }
+
+    
+    if (_hasFallenOffWorld) return; 
+
+
+    if (_isRotating && ! _spawning) {
       RotationStep();
       return;
     }
 
-    if (HandleFalling()) return;
+    if (HandleFalling()) return;  
+
     SnapToGrid();
+
     if (_spawning) {
       _spawning = false;
-      return; // early exit to avoid player moving when snapping to the grid after falling
+      TryAdvanceLevel(); 
+      return;
     }
 
-    Vector2 dir     = _moveAction.ReadValue<Vector2>();
-    if (lockUp) dir = Vector2.up;
-    if (!HasMovementInput(dir))
-      return;
+    TryAdvanceLevel(); // ana 
+
+    Vector2 dir = _moveAction.ReadValue<Vector2>();
+    if (! HasMovementInput(dir)) return;
+
     BeginRotation(dir);
+  }
+  
+
+  public void ResetState() {
+    Debug.Log("[MoveCuboid] ResetState llamado");
+    
+    _hasFallenOffWorld = false;
+    _isRotating = false;
+    _remainingRotationAngle = 0f;
+    
+    
+    _spawning = true; 
+
+    var rb = GetComponent<Rigidbody>();
+    if (rb) {
+        rb.linearVelocity = Vector3.zero;  
+        rb.angularVelocity = Vector3.zero;
+        
+        rb.useGravity = false; 
+        rb.isKinematic = true; 
+    }
+  }
+
+  #endregion
+
+  #region Positioning
+
+  private void SnapToGrid() {
+    Vector3 pos = transform.position;
+    pos.x = Mathf.Round(pos.x * 2.0f) / 2.0f;
+    pos.y = IsStanding() ? 1.0f : 0.5f;
+    pos.z = Mathf.Round(pos.z * 2.0f) / 2.0f;
+    transform.position = pos;
+  }
+
+  #endregion
+
+  #region Debug
+
+  private void DrawDebugLines() {
+    Debug.DrawLine(centerA.position, centerB.position);
+    if (_isRotating) Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
   }
 
   #endregion
@@ -99,7 +161,7 @@ public class MoveCuboid : MonoBehaviour
   #region Physics Helpers
 
   private bool IsPhysicsEnabled() {
-    return !_rigidbody.freezeRotation && _rigidbody.useGravity;
+    return ! _rigidbody.freezeRotation && _rigidbody.useGravity;
   }
 
   private void SetPhysicsEnabled(bool value) {
@@ -113,18 +175,12 @@ public class MoveCuboid : MonoBehaviour
 
   private bool IsPointGrounded(Transform point, Color debugColor) {
     RaycastHit hit;
-    float      rayDistance = _collider.bounds.extents.y * 2f;
-    Vector3    origin      = point.position;
+    float rayDistance = _collider.bounds.extents.y * 2f;
+    Vector3 origin = point.position;
 
     Debug.DrawLine(origin, origin + Vector3.down * rayDistance, debugColor);
 
-    return Physics.Raycast(
-      origin,
-      Vector3.down,
-      out hit,
-      rayDistance,
-      _groundMask
-    );
+    return Physics.Raycast(origin, Vector3.down, out hit, rayDistance, _groundMask);
   }
 
   private bool IsGrounded() {
@@ -134,8 +190,35 @@ public class MoveCuboid : MonoBehaviour
   }
 
   private bool IsStanding() {
-    return Mathf.Abs(Mathf.Abs(centerA.position.y) - Mathf.Abs(centerB.position.y)) >
-           0.001f;
+    return Mathf.Abs(centerA.position.y - centerB.position.y) > 0.001f;
+  }
+
+  #endregion
+
+  #region Goal Detection
+
+  private bool HasReachedGoal() {
+    if (! IsStanding()) return false;
+
+    float rayDistance = _collider.bounds.extents.y * 2f;
+    Transform lower = centerA.position.y < centerB.position.y ? centerA : centerB;
+
+    RaycastHit hit;
+    if (Physics.Raycast(lower.position, Vector3.down, out hit, rayDistance, _groundMask)) {
+      return hit.collider.CompareTag("Goal");
+    }
+    return false;
+  }
+
+  private void TryAdvanceLevel() {
+    if (IsPhysicsEnabled()) return;
+    if (!HasReachedGoal()) return;
+
+    if (LevelManager.Instance != null) {
+      LevelManager.Instance.NotifyGoalReached();
+    } else {
+      Debug.LogWarning("[MoveCuboid] LevelManager.Instance es null.");
+    }
   }
 
   #endregion
@@ -151,12 +234,10 @@ public class MoveCuboid : MonoBehaviour
     _remainingRotationAngle  = 90f;
     _rotationStartedStanding = IsStanding();
 
-    // set rotation axis and direction
     if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
       _rotationAxis      = Vector3.forward;
       _rotationDirection = dir.x > 0 ? -1f : 1f;
-    }
-    else {
+    } else {
       _rotationAxis      = Vector3.right;
       _rotationDirection = dir.y > 0 ? 1f : -1f;
     }
@@ -165,18 +246,13 @@ public class MoveCuboid : MonoBehaviour
   }
 
   private Vector3 GetRotationPoint(Vector2 dir) {
-    Vector3 center  = _collider.bounds.center;  // world-space center
-    Vector3 extents = _collider.bounds.extents; // half-size in world units
+    Vector3 center  = _collider.bounds.center;
+    Vector3 extents = _collider.bounds.extents;
 
-    if (dir.x > 0.99f)
-      return new Vector3(center.x + extents.x, center.y - extents.y, center.z);
-    if (dir.x < -0.99f)
-      return new Vector3(center.x - extents.x, center.y - extents.y, center.z);
-
-    if (dir.y > 0.99f)
-      return new Vector3(center.x, center.y - extents.y, center.z + extents.z);
-    if (dir.y < -0.99f)
-      return new Vector3(center.x, center.y - extents.y, center.z - extents.z);
+    if (dir.x > 0.99f)  return new Vector3(center.x + extents.x, center.y - extents.y, center.z);
+    if (dir.x < -0.99f) return new Vector3(center.x - extents.x, center.y - extents.y, center.z);
+    if (dir.y > 0.99f)  return new Vector3(center.x, center.y - extents.y, center.z + extents.z);
+    if (dir.y < -0.99f) return new Vector3(center.x, center.y - extents.y, center.z - extents.z);
 
     return center;
   }
@@ -198,6 +274,7 @@ public class MoveCuboid : MonoBehaviour
     if (_remainingRotationAngle <= 0f) {
       _isRotating = false;
       SnapToGrid();
+      TryAdvanceLevel(); // comprobar meta al terminar movimiento
     }
   }
 
@@ -217,7 +294,7 @@ public class MoveCuboid : MonoBehaviour
     if (!IsPointGrounded(centerA, Color.red))
       _rigidbody.centerOfMass = centerA.localPosition;
 
-    if (!IsPointGrounded(centerB, Color.blue))
+    if (! IsPointGrounded(centerB, Color.blue))
       _rigidbody.centerOfMass = centerB.localPosition;
   }
 
@@ -231,9 +308,8 @@ public class MoveCuboid : MonoBehaviour
 
     SetPhysicsEnabled(true);
 
-    // not rotating, no direction to continue in
     if (_rotationAxis == Vector3.zero || Mathf.Approximately(rotSpeed, 0f))
-      return;
+        return;
 
     float radiansPerSecond = rotSpeed * Mathf.Deg2Rad * _rotationDirection;
     _rigidbody.angularVelocity = _rotationAxis.normalized * radiansPerSecond;
@@ -243,4 +319,6 @@ public class MoveCuboid : MonoBehaviour
   }
 
   #endregion
+
+  
 }
