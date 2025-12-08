@@ -148,7 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e777aceb2d889614a92b4af5c54542a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapCreation
-  map: {fileID: 4900000, guid: 28cf6d1fb1568cb4bb508f4e3e9d31dc, type: 3}
+  levelMaps:
+  - {fileID: 4900000, guid: 28cf6d1fb1568cb4bb508f4e3e9d31dc, type: 3}
+  - {fileID: 4900000, guid: a6e917f34ac582abaa47a755691ea925, type: 3}
   tileNormal: {fileID: 7761140359684795549, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
   tileGoal: {fileID: 5975012489397065638, guid: 3d63899e8d5d37dda8ec6d5313e34682, type: 3}
   tileFragile: {fileID: 7826549561695677205, guid: 303911b4b74a1264d8e577fd506bd197, type: 3}
@@ -416,8 +418,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   playerPrefab: {fileID: 8049392329886490164, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
   playerSpawnPoint: {fileID: 1078129712}
-  currentLevelIndex: 1
-  maxLevels: 9
 --- !u!4 &1036113713
 Transform:
   m_ObjectHideFlags: 0

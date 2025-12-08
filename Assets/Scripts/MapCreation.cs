@@ -83,20 +83,27 @@ public class MapCreation : MonoBehaviour
 
   private void CreateTileAt(TileType tileType, int x, int z) {
     var position = new Vector3(x, TileYOffset, z);
-    Quaternion rotation = transform.rotation;
-    GameObject tile;
+    Quaternion rotation = Quaternion.identity; 
+
+    GameObject tilePrefab = null;
+    
     switch (tileType) {
-    case TileType.Empty: return;
-    case TileType.Normal: tile = tileNormal; break;
-    case TileType.Goal: tile = tileGoal; break;
-    case TileType.Fragile: tile = tileFragile; break;
-    case TileType.Separator: tile = tileSeparator; break;
-    case TileType.Obutton: tile = tileObutton; break;
-    case TileType.Xbutton: tile = tileXbutton; break;
-    default: return;
+        case TileType.Empty:     return;
+        case TileType.Normal:    tilePrefab = tileNormal; break;
+        case TileType.Goal:      tilePrefab = tileGoal; break;
+        case TileType.Fragile:   tilePrefab = tileFragile; break;
+        case TileType.Separator: tilePrefab = tileSeparator; break;
+        case TileType.Obutton:   tilePrefab = tileObutton; break;
+        case TileType.Xbutton:   tilePrefab = tileXbutton; break;
     }
-    GameObject obj = Instantiate(tile, position, rotation);
-    obj.transform.parent = transform;
+
+    if (tilePrefab != null) {
+        
+        GameObject obj = Instantiate(tilePrefab, position, rotation);
+        obj.transform.parent = transform;
+        TileAnimator animator = obj.AddComponent<TileAnimator>();
+        animator.Animate(position);
+    }
   }
   
   private enum TileType { Empty=1, Normal=2, Goal=3, Fragile=4, Separator=5, Obutton=6, Xbutton=7 }
