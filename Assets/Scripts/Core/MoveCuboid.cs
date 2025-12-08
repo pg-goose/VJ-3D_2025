@@ -50,6 +50,20 @@ public class MoveCuboid : MonoBehaviour
   private void Update() {
     DrawDebugLines();
 
+    if (transform.position.y < -10f && !_hasFallenOffWorld) {
+      _hasFallenOffWorld = true;
+      Debug.Log("[MoveCuboid] Cayó al vacío. Notificando reinicio...");
+      
+      if (LevelManager.Instance != null) {
+        LevelManager.Instance.NotifyPlayerFell();
+      }
+      return; 
+    }
+
+    
+    if (_hasFallenOffWorld) return; 
+
+
     if (_isRotating && ! _spawning) {
       RotationStep();
       return;
@@ -59,24 +73,12 @@ public class MoveCuboid : MonoBehaviour
 
     SnapToGrid();
 
-    
-    if (transform.position.y < -5f && !_hasFallenOffWorld) {
-      _hasFallenOffWorld = true;
-      Debug.Log("[MoveCuboid] Cayó, notificando a LevelManager");
-      if (LevelManager.Instance != null) {
-        LevelManager.Instance.NotifyPlayerFell();
-      } else {
-        Debug.LogError("[MoveCuboid] LevelManager. Instance es null");
-      }
+    if (_spawning) {
+      _spawning = false;
+      TryAdvanceLevel(); 
       return;
     }
 
-    if (_spawning) {
-      _spawning = false;
-      TryAdvanceLevel(); // comprobar si spawn directamente en meta
-      return;
-    }
-    
     TryAdvanceLevel();
 
     Vector2 dir = _moveAction.ReadValue<Vector2>();
