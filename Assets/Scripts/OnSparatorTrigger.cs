@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,7 +5,7 @@ using UnityEngine;
 /// when stepping on a TileSeparator.
 /// </summary>
 [RequireComponent(typeof(MoveCuboid))]
-public class PlayerSeparator : MonoBehaviour
+public class OnSparatorTrigger : OnStandingTrigger
 {
   [Header("Cube Prefab")]
   [SerializeField] private GameObject cubePrefab;
@@ -30,31 +29,26 @@ public class PlayerSeparator : MonoBehaviour
     _moveCuboid = GetComponent<MoveCuboid>();
     _originalSpawnPosition = transform.position;
   }
-
-  private void OnTriggerStay(Collider other) {
-    Vector3 colliderPos = other.transform.position;
-    Vector3 playerPosA  = centerA.position;
-    Vector3 playerPosB   = centerB.position;
-      
-    bool aOnTop = MathUtils.Approximately(colliderPos.x, playerPosA.x) && MathUtils.Approximately(colliderPos.z, playerPosA.z);
-    bool bOnTop = MathUtils.Approximately(colliderPos.x, playerPosB.x) && MathUtils.Approximately(colliderPos.z, playerPosB.z);
-    bool standing = aOnTop && bOnTop;
-    if (standing && !_isSeparated && other.CompareTag("Separator")) {    
-        SeparatePlayer();
-    }
+  
+  public bool IsSeparated() {
+    return _isSeparated;
   }
   
-  private void SeparatePlayer() {
+  public override void OnTriggerStay(Collider other) {
+    if (_isSeparated) return;
+    if (!StandingOnCollider(other)) return;
+    if (!other.CompareTag("Separator")) return;
+    
     if (!cubePrefab) {
-      Debug.LogError("PlayerSeparator: Cube prefab not assigned!");
+      Debug.LogError("OnSparatorTrigger: Cube prefab not assigned!");
       return;
     }
-    _isSeparated = true;
+    _isSeparated        = true;
     _moveCuboid.enabled = false;
     CreateSeparatedCubes();
     HideCuboid();
   }
-
+  
   private void CreateSeparatedCubes() {
     Vector3 spawnPos = _originalSpawnPosition;
     spawnPos.y = .5f;
@@ -112,12 +106,11 @@ public class PlayerSeparator : MonoBehaviour
   public void MergeCubes() {
     Vector3 posA = _cubeA.transform.position;
     Vector3 posB = _cubeB.transform.position;
-
     if (MathUtils.Approximately(Vector3.Distance(posA, posB), 1.0f, 0.001f)) {
       RestoreCuboid(posA, posB);
     }
   }
-
+  
   private void RestoreCuboid(Vector3 posA, Vector3 posB) {
     // where the cuboid should be
     Vector3 center = (posA + posB) * 0.5f;
@@ -150,9 +143,5 @@ public class PlayerSeparator : MonoBehaviour
     _isSeparated        = false;
     _moveCuboid.enabled = true;
     _moveCuboid.SetSpawning(true);
-  }
-  
-  public bool IsSeparated() {
-    return _isSeparated;
   }
 }

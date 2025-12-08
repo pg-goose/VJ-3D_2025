@@ -34,7 +34,6 @@ public class MoveCuboid : MonoBehaviour
   private bool _spawning = true;
 
 
-
   #region Debug
 
   private void DrawDebugLines() {

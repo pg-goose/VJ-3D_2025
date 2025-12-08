@@ -56,8 +56,32 @@ PrefabInstance:
       propertyPath: m_Name
       value: TileFragile
       objectReference: {fileID: 0}
+    - target: {fileID: 7888716122535042794, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7761140359684795549, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2477918932073730761}
   m_SourcePrefab: {fileID: 100100000, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+--- !u!1 &7826549561695677205 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7761140359684795549, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+  m_PrefabInstance: {fileID: 515769176764811144}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2477918932073730761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7826549561695677205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c6af363895f4d4aad4e249bb03f77b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.FragileTrigger

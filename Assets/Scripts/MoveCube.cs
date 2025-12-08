@@ -38,7 +38,7 @@ public class MoveCube : MonoBehaviour
   // State
   private bool _isActive;
   private MoveCube _otherCube;
-  private PlayerSeparator _playerSeparator;
+  private OnSparatorTrigger _onSparatorTrigger;
   private bool _spawning = true;
   private bool _switchHandledThisFrame;
 
@@ -96,12 +96,16 @@ public class MoveCube : MonoBehaviour
     _otherCube = other;
   }
 
-  public void SetPlayerSeparator(PlayerSeparator separator) {
-    _playerSeparator = separator;
+  public void SetPlayerSeparator(OnSparatorTrigger separated) {
+    _onSparatorTrigger = separated;
   }
 
   public bool IsActive() {
     return _isActive;
+  }
+
+  public void OnPlayerWon() {
+    
   }
 
   #endregion
@@ -116,7 +120,7 @@ public class MoveCube : MonoBehaviour
     transform.position = pos;
     
     Quaternion rot = transform.rotation;
-    transform.rotation = Quaternion.Euler(rot.x, 0f, rot.z);
+    transform.rotation = Quaternion.Euler(rot.x * 3, 0f, rot.z * 3);
   }
 
   #endregion
@@ -155,11 +159,9 @@ public class MoveCube : MonoBehaviour
       StartFalling();
       return true;
     }
-
     if (IsPhysicsEnabled()) {
       SetPhysicsEnabled(false);
     }
-
     return false;
   }
 
@@ -170,14 +172,12 @@ public class MoveCube : MonoBehaviour
       _rigidbody.useGravity = true;
       return;
     }
-
     SetPhysicsEnabled(true);
 
     if (_rotationAxis != Vector3.zero && !Mathf.Approximately(rotSpeed, 0f)) {
       float radiansPerSecond = rotSpeed * Mathf.Deg2Rad * _rotationDirection;
       _rigidbody.angularVelocity = _rotationAxis.normalized * radiansPerSecond;
     }
-
     if (fallSound) {
       AudioSource.PlayClipAtPoint(fallSound, transform.position);
     }
@@ -230,7 +230,6 @@ public class MoveCube : MonoBehaviour
     if (step > _remainingRotationAngle) {
       step = _remainingRotationAngle;
     }
-
     transform.RotateAround(_rotationPoint, _rotationAxis, step * _rotationDirection);
     _remainingRotationAngle -= step;
 
@@ -238,19 +237,13 @@ public class MoveCube : MonoBehaviour
       StartFalling();
       return;
     }
-
     if (_remainingRotationAngle <= 0f) {
       _isRotating = false;
       SnapToGrid();
-      if (_playerSeparator && _playerSeparator.IsSeparated()) {
-        _playerSeparator.MergeCubes();
+      if (_onSparatorTrigger && _onSparatorTrigger.IsSeparated()) {
+        _onSparatorTrigger.MergeCubes();
       }
     }
   }
-
-  private void CheckForMerge() {
-
-  }
-
   #endregion
 }

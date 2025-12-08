@@ -297,6 +297,24 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &688471908 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8049392329886490164, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+  m_PrefabInstance: {fileID: 1532632949}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &688471914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688471908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b8f6e2d9c1a7e3f5d8b2a6c9e4f7d1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OnGoalTrigger
+  levelOrchestrator: {fileID: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,10 +424,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8049392329886490164, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8049392329886490164, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 688471914}
   m_SourcePrefab: {fileID: 100100000, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
 --- !u!4 &1532632950 stripped
 Transform:
