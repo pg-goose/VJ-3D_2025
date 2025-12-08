@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class LevelManager : MonoBehaviour
 {
@@ -26,6 +27,30 @@ public class LevelManager : MonoBehaviour
     private void Start() {
         // Al empezar la escena Level0, cargamos el primer mapa 
         LoadLevel(_currentMapIndex);
+    }
+    private void Update()
+    {
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) LoadLevelSafe(0);
+        
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) LoadLevelSafe(1);
+    }
+
+    private void LoadLevelSafe(int index)
+    {
+        
+        if (_mapCreation != null && _mapCreation.levelMaps != null)
+        {
+            if (index >= 0 && index < _mapCreation.levelMaps.Length)
+            {
+                
+                _currentMapIndex = index; 
+                LoadLevel(index);         
+            }
+            else
+            {
+                Debug.LogWarning($"[LevelManager] Has pulsado la tecla {index + 1}, pero solo tienes {_mapCreation.levelMaps.Length} mapas en la lista.");
+            }
+        }
     }
 
     private void LoadLevel(int index) {
