@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Separator
+  - Goal
   layers:
   - Default
   - TransparentFX
