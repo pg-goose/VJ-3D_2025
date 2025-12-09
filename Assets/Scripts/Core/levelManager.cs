@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class LevelManager : MonoBehaviour
 {
@@ -9,7 +10,11 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform playerSpawnPoint; 
 
+    [Header("Camera")]
+    [SerializeField] private CameraFollow mainCamera;
+
     private MapCreation _mapCreation;
+    private Vector3 _currentLevelSpawnPos;
     private GameObject _playerInstance;
     private MoveCuboid _playerController;
 
@@ -56,14 +61,14 @@ public class LevelManager : MonoBehaviour
     private void LoadLevel(int index) {
         Debug.Log($"[LevelManager] Cargando mapa índice {index}...");
 
-        
         if (_mapCreation != null) {
             foreach (Transform child in _mapCreation.transform) Destroy(child.gameObject);
             
+            _currentLevelSpawnPos = _mapCreation.CreateMap(index);
             
-            _mapCreation.CreateMap(index);
             Physics.SyncTransforms();
         }
+        
         SetupAndResetPlayer();
     }
 
@@ -97,24 +102,41 @@ public class LevelManager : MonoBehaviour
     }
 
     private void SetupAndResetPlayer() {
-        Vector3 spawnPos = new Vector3(0, 10, 0);
-        if (playerSpawnPoint == null) {
-            var obj = GameObject.Find("SpawnPoint");
-            if (obj) playerSpawnPoint = obj.transform;
-        }
-        if (playerSpawnPoint) spawnPos = playerSpawnPoint.position;
+        Vector3 finalSpawnPos = _currentLevelSpawnPos != Vector3.zero ? _currentLevelSpawnPos : new Vector3(0, 10, 0);
 
+        
         if (_playerInstance == null) {
             _playerInstance = GameObject.FindGameObjectWithTag("Player");
             if (!_playerInstance && playerPrefab) 
-                _playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+                _playerInstance = Instantiate(playerPrefab, finalSpawnPos, Quaternion.identity);
         }
 
         if (_playerInstance) {
-            _playerInstance.transform.position = spawnPos;
+            
+            _playerInstance.transform.position = finalSpawnPos;
             _playerInstance.transform.rotation = Quaternion.identity;
+            
+            
+            if (mainCamera != null) mainCamera.SetTarget(_playerInstance.transform);
+
+            
             _playerController = _playerInstance.GetComponent<MoveCuboid>();
-            if (_playerController) _playerController.ResetState();
+            if (_playerController) {
+                _playerController.ResetState();
+                
+                
+                _playerController.enabled = false;
+                StartCoroutine(DropPlayerSequence());
+            }
+        }
+    }
+    private IEnumerator DropPlayerSequence()
+    {
+        
+        yield return new WaitForSeconds(0.8f);
+        if (_playerController != null)
+        {
+            _playerController.enabled = true;
         }
     }
 
