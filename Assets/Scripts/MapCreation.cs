@@ -97,13 +97,17 @@ public class MapCreation : MonoBehaviour
         case TileType.Xbutton:   tilePrefab = tileXbutton; break;
     }
 
-    if (tilePrefab != null) {
-        
+    if (tilePrefab) {
         GameObject obj = Instantiate(tilePrefab, position, rotation);
         obj.transform.parent = transform;
         TileAnimator animator = obj.AddComponent<TileAnimator>();
         animator.Animate(position);
     }
+  }
+
+  public void UnloadMap() {
+    foreach (Transform child in transform)
+      Destroy(child.gameObject);
   }
   
   private enum TileType { Empty=1, Normal=2, Goal=3, Fragile=4, Separator=5, Obutton=6, Xbutton=7 }

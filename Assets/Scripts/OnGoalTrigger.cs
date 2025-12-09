@@ -3,7 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(MoveCuboid))]
 public class OnGoalTrigger : OnStandingTrigger
 {
-  [SerializeField] private LevelOrchestrator levelOrchestrator;
+  [SerializeField]
+  private LevelManager levelManager;
   private bool _goalReached = false;
   private MoveCuboid _moveCuboid;
 
@@ -18,8 +19,8 @@ public class OnGoalTrigger : OnStandingTrigger
     
     _goalReached        = true;
     _moveCuboid.enabled = false;
-    if (LevelOrchestrator.Instance) {
-      // LevelOrchestrator.Instance.OnLevelComplete();
+    if (levelManager) {
+      levelManager.OnLevelComplete();
       Debug.Log("Goal reached");
       return;
     }
