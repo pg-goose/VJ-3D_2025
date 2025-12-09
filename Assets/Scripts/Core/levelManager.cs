@@ -117,7 +117,8 @@ public class LevelManager : MonoBehaviour
             _playerInstance.transform.rotation = Quaternion.identity;
             
             
-            if (mainCamera != null) mainCamera.SetTarget(_playerInstance.transform);
+           
+            if (mainCamera != null) mainCamera.SetTarget(_playerInstance.transform, true);
 
             
             _playerController = _playerInstance.GetComponent<MoveCuboid>();
