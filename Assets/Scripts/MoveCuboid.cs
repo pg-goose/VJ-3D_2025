@@ -41,9 +41,8 @@ public class MoveCuboid : MonoBehaviour
     Debug.DrawLine(centerA.position, centerB.position);
     if (_isRotating) Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
   }
-
-  #endregion
   private bool _hasFallenOffWorld = false;
+  #endregion
 
   #region Unity
 
@@ -63,9 +62,7 @@ public class MoveCuboid : MonoBehaviour
 
     if (transform.position.y < -10f && !_hasFallenOffWorld) {
       _hasFallenOffWorld = true;
-      Debug.Log("[MoveCuboid] Cayó al vacío. Notificando reinicio...");
-      
-      if (LevelManager.Instance != null) {
+      if (LevelManager.Instance) {
         LevelManager.Instance.NotifyPlayerFell();
       }
       return; 
@@ -109,7 +106,7 @@ public class MoveCuboid : MonoBehaviour
     
     _spawning = true; 
 
-    var rb = GetComponent<Rigidbody>();
+    Rigidbody rb = GetComponent<Rigidbody>();
     if (rb) {
         rb.linearVelocity = Vector3.zero;  
         rb.angularVelocity = Vector3.zero;
@@ -133,30 +130,9 @@ public class MoveCuboid : MonoBehaviour
 
   #endregion
 
-  #region Debug
-
-  private void DrawDebugLines() {
-    Debug.DrawLine(centerA.position, centerB.position);
-    if (_isRotating) Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
-  }
-
-  #endregion
-
   public void SetSpawning(bool value) {
     _spawning = value;
   }
-
-  #region Positioning
-
-  private void SnapToGrid() {
-    Vector3 pos = transform.position;
-    pos.x              = Mathf.Round(pos.x * 2.0f) / 2.0f;
-    pos.y              = IsStanding() ? 1.0f : 0.5f;
-    pos.z              = Mathf.Round(pos.z * 2.0f) / 2.0f;
-    transform.position = pos;
-  }
-
-  #endregion
 
   #region Physics Helpers
 

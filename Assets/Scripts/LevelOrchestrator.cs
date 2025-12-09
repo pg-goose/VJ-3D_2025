@@ -32,6 +32,7 @@ public class LevelOrchestrator : MonoBehaviour
 
   #region Level Intro
 
+  // ReSharper disable Unity.PerformanceAnalysis
   /// <summary>
   /// Executes the level introduction sequence:
   /// 1. Create map tiles
@@ -56,8 +57,9 @@ public class LevelOrchestrator : MonoBehaviour
     _isTransitioning = false;
   }
 
+  // ReSharper disable Unity.PerformanceAnalysis
   private IEnumerator CreateMap() {
-    if (mapCreation != null) {
+    if (mapCreation) {
       // MapCreation creates tiles in its Start(), so we need to ensure it runs
       // If it hasn't run yet, wait a frame
       yield return null;
@@ -87,7 +89,7 @@ public class LevelOrchestrator : MonoBehaviour
 
     // Start all tile animations
     foreach (TileAnimator animator in _tileAnimators) {
-      if (animator != null) {
+      if (animator) {
         animator.StartAnimation();
       }
     }
@@ -103,7 +105,7 @@ public class LevelOrchestrator : MonoBehaviour
       allFinished = true;
       
       foreach (TileAnimator animator in _tileAnimators) {
-        if (animator != null && !animator.AnimationFinished) {
+        if (animator && !animator.AnimationFinished) {
           allFinished = false;
           break;
         }
@@ -114,7 +116,7 @@ public class LevelOrchestrator : MonoBehaviour
   }
 
   private void SpawnPlayer() {
-    if (playerSpawn != null) {
+    if (playerSpawn) {
       // The Spawn script will instantiate the player
       // We could capture the reference if needed
       playerSpawn.enabled = true;
