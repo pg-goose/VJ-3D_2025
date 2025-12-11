@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4175380887559467695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8937073764841867141}
+  - component: {fileID: 4210293234622267403}
+  m_Layer: 0
+  m_Name: MapCreator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8937073764841867141
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4175380887559467695}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4210293234622267403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4175380887559467695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ba7e501ecf5aaf48a37e40a6971e7dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapCreation
+  levelMaps:
+  - {fileID: 4900000, guid: 28cf6d1fb1568cb4bb508f4e3e9d31dc, type: 3}
+  - {fileID: 4900000, guid: a6e917f34ac582abaa47a755691ea925, type: 3}
+  tileNormal: {fileID: 7761140359684795549, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+  tileGoal: {fileID: 5975012489397065638, guid: 3d63899e8d5d37dda8ec6d5313e34682, type: 3}
+  tileFragile: {fileID: 7826549561695677205, guid: 303911b4b74a1264d8e577fd506bd197, type: 3}
+  tileSeparator: {fileID: 4545557781366822706, guid: 88c973ac8ff0c11b0b31398d1927735b, type: 3}
+  tileObutton: {fileID: 8557922233599738515, guid: acb264bda4755365b971581c79e89e75, type: 3}
+  tileXbutton: {fileID: 1267679986052158558, guid: ba9a7fe12c8d870cf994557587a1e135, type: 3}

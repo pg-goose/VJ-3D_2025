@@ -72,11 +72,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3200885242919032908}
   - component: {fileID: 1762064661065020349}
-  - component: {fileID: 4662619089792285689}
   - component: {fileID: 8226212933532624311}
-  - component: {fileID: 7713788704041585213}
-  - component: {fileID: 1454508342707325800}
-  - component: {fileID: 5485925296840446741}
+  - component: {fileID: 6934729401208589151}
+  - component: {fileID: 4662619089792285689}
+  - component: {fileID: 2296050349717250105}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -123,25 +122,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &4662619089792285689
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049392329886490164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a088c3a08304c994db1bfa1eb0d2a4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MoveCuboid
-  rotSpeed: 200
-  fallSpeed: 4
-  lockUp: 0
-  sounds: []
-  fallSound: {fileID: 0}
-  centerA: {fileID: 5257146122002114548}
-  centerB: {fileID: 1886462780154640081}
 --- !u!54 &8226212933532624311
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -169,7 +149,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7713788704041585213
+--- !u!114 &6934729401208589151
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -178,14 +158,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8049392329886490164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c9e7f4a8d3b6e1f9c5a8d2e7b4f6a3c, type: 3}
+  m_Script: {fileID: 11500000, guid: aeba8abf073943eda55daeef0f32d70b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerSeparator
-  cubePrefab: {fileID: 6500309188609885533, guid: 0fa71dba8d83beebb965923fd91b5427, type: 3}
-  centerA: {fileID: 0}
-  centerB: {fileID: 0}
-  separationSound: {fileID: 0}
---- !u!114 &1454508342707325800
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCore
+  fallYThreshold: -5
+--- !u!114 &4662619089792285689
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -194,11 +171,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 8049392329886490164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b8f6e2d9c1a7e3f5d8b2a6c9e4f7d1a, type: 3}
+  m_Script: {fileID: 11500000, guid: 26ae2c1c0823a4c58b94712ea3fe61c9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OnGoalTrigger
-  levelOrchestrator: {fileID: 0}
---- !u!114 &5485925296840446741
+  m_EditorClassIdentifier: Assembly-CSharp::MoveCuboid
+  rotationSpeed: 200
+  fallSpeed: 100
+  sounds: []
+  fallSound: {fileID: 0}
+  centerA: {fileID: 5257146122002114548}
+  centerB: {fileID: 1886462780154640081}
+--- !u!114 &2296050349717250105
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -207,9 +189,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8049392329886490164}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19383948e7e44b47a7ffb4041d84ae46, type: 3}
+  m_Script: {fileID: 11500000, guid: 01cca23af0d6259068e38af568163536, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OnFragileTrigger
+  m_EditorClassIdentifier: Assembly-CSharp::TileStandingDispatcher
 --- !u!1001 &3046221307105294731
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,4 +1,6 @@
+using System;
 using System.Numerics;
+using Unity.Burst;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Quaternion = UnityEngine.Quaternion;
@@ -13,13 +15,19 @@ using Vector3 = UnityEngine.Vector3;
 [RequireComponent(typeof(Rigidbody))]
 public class MoveCube : MonoBehaviour
 {
-  [Header("Movement Settings")]
-  public float rotSpeed = 180f;
+  private enum State
+  {
+    Spawning,
+    Idle,
+    Rotating,
+    Falling
+  }
+
+  [Header("Movement Settings")] public float rotSpeed = 180f;
 
   public bool lockUp = false;
 
-  [Header("Audio")]
-  public AudioClip[] sounds;
+  [Header("Audio")] public AudioClip[] sounds;
   public AudioClip fallSound;
 
   private Collider _collider;
@@ -29,58 +37,94 @@ public class MoveCube : MonoBehaviour
   private InputAction _switchAction;
 
   // Rotation
-  private bool _isRotating;
   private float _remainingRotationAngle;
   private Vector3 _rotationAxis;
   private float _rotationDirection;
   private Vector3 _rotationPoint;
 
   // State
+  private State _state = State.Spawning;
   private bool _isActive;
+  private bool _justActivated;
+  private bool _justMoved;
   private MoveCube _otherCube;
-  private OnSparatorTrigger _onSparatorTrigger;
-  private bool _spawning = true;
-  private bool _switchHandledThisFrame;
+  private PlayerCore _player;
+
 
   #region Unity Methods
 
   private void Awake() {
-    _collider = GetComponent<Collider>();
+    _collider  = GetComponent<Collider>();
     _rigidbody = GetComponent<Rigidbody>();
     SetPhysicsEnabled(false);
   }
 
   private void Start() {
-    _moveAction = InputSystem.actions.FindAction("Move");
+    _moveAction   = InputSystem.actions.FindAction("Move");
     _switchAction = InputSystem.actions.FindAction("Switch");
-    _groundMask = LayerMask.GetMask("Ground");
+    _groundMask   = LayerMask.GetMask("Ground");
   }
 
   private void Update() {
-    // Handle switching between cubes (both cubes need to check this)
-    if (_switchAction.WasPressedThisFrame() && _isActive && !_switchHandledThisFrame) {
-        _isActive = false;
-        _otherCube.SetActive(true);
-    }
-    _switchHandledThisFrame = false;
-    
-    // Only the active cube handles movement
-    if (!_isActive) return;
-    
-    if (_isRotating && !_spawning) {
-      RotationStep();
+    if (_isActive && _switchAction.WasPressedThisFrame()) {
+      if (_justActivated) {
+        _justActivated = false;
+        return;
+      }
+
+      SwitchToOtherCube();
       return;
     }
-    if (HandleFalling()) return;
-    SnapToGrid();
-    if (_spawning) {
-      _spawning = false;
+
+    switch (_state) {
+    case State.Falling:
+      // Check if we've landed
+      if (IsGrounded()) {
+        SetPhysicsEnabled(false);
+        _state = State.Idle;
+        SnapToGrid();
+      }
+      return;
+
+    case State.Rotating:
+      RotationStep();
+      return;
+
+    case State.Spawning:
+      if (HandleFalling()) return;
+      SnapToGrid();
+      _state = State.Idle;
+      return;
+
+    case State.Idle:
+      if (HandleFalling()) return;
+      SnapToGrid();
+      TryBeginMovement();
+      return;
+    }
+  }
+
+  public bool IsIdle() {
+    return _state == State.Idle;
+  }
+
+  private void SwitchToOtherCube() {
+    if (!_otherCube) return;
+    _isActive = false;
+    _otherCube.SetActive(true);
+    GameEvents.EmitCameraTargetChanged(_otherCube.transform);
+  }
+
+  private void TryBeginMovement() {
+    if (_justMoved || !_isActive) {
+      _justMoved = false;
       return;
     }
     Vector2 dir = _moveAction.ReadValue<Vector2>();
-    dir = lockUp ? Vector2.up : dir; 
+    dir = lockUp ? Vector2.up : dir;
     if (!HasMovementInput(dir)) return;
     BeginRotation(dir);
+    _justMoved = true;
   }
 
   #endregion
@@ -88,37 +132,33 @@ public class MoveCube : MonoBehaviour
   #region Public API
 
   public void SetActive(bool active) {
-    _isActive               = active;
-    _switchHandledThisFrame = true;
+    _isActive      = active;
+    _justActivated = true;
   }
 
   public void SetOtherCube(MoveCube other) {
     _otherCube = other;
   }
 
-  public void SetPlayerSeparator(OnSparatorTrigger separated) {
-    _onSparatorTrigger = separated;
+  public void SetPlayerCore(PlayerCore core) {
+    _player = core;
   }
 
   public bool IsActive() {
     return _isActive;
   }
 
-  public void OnPlayerWon() {
-    
-  }
-
   #endregion
-  
+
   #region Positioning
 
   private void SnapToGrid() {
     Vector3 pos = transform.position;
-    pos.x = Mathf.Round(pos.x);
-    pos.y = 0.5f; // Cubes are always at height 0.5
-    pos.z = Mathf.Round(pos.z);
+    pos.x              = Mathf.Round(pos.x * 2.0f) / 2.0f;
+    pos.y              = 0.5f; // Cubes are always at height 0.5
+    pos.z              = Mathf.Round(pos.z * 2.0f) / 2.0f;
     transform.position = pos;
-    
+
     Quaternion rot = transform.rotation;
     transform.rotation = Quaternion.Euler(rot.x * 3, 0f, rot.z * 3);
   }
@@ -133,7 +173,7 @@ public class MoveCube : MonoBehaviour
 
   private void SetPhysicsEnabled(bool value) {
     _rigidbody.freezeRotation = !value;
-    _rigidbody.useGravity = value;
+    _rigidbody.useGravity     = value;
   }
 
   #endregion
@@ -141,8 +181,8 @@ public class MoveCube : MonoBehaviour
   #region Grounding
 
   private bool IsGrounded() {
-    float rayDistance = _collider.bounds.extents.y * 2f;
-    Vector3 origin = transform.position;
+    float   rayDistance = _collider.bounds.extents.y * 2f;
+    Vector3 origin      = transform.position;
 
     Debug.DrawLine(origin, origin + Vector3.down * rayDistance, Color.green);
 
@@ -159,28 +199,36 @@ public class MoveCube : MonoBehaviour
       StartFalling();
       return true;
     }
+
     if (IsPhysicsEnabled()) {
       SetPhysicsEnabled(false);
     }
+
     return false;
   }
 
   private void StartFalling() {
-    _isRotating = false;
+    bool wasSpawning = _state == State.Spawning;
+    _state = State.Falling;
 
-    if (_spawning) {
+    if (wasSpawning) {
       _rigidbody.useGravity = true;
       return;
     }
+
     SetPhysicsEnabled(true);
 
     if (_rotationAxis != Vector3.zero && !Mathf.Approximately(rotSpeed, 0f)) {
       float radiansPerSecond = rotSpeed * Mathf.Deg2Rad * _rotationDirection;
       _rigidbody.angularVelocity = _rotationAxis.normalized * radiansPerSecond;
     }
+
     if (fallSound) {
       AudioSource.PlayClipAtPoint(fallSound, transform.position);
     }
+
+    // Emit cube fell event to restart the level
+    GameEvents.EmitCubeFell();
   }
 
   #endregion
@@ -192,16 +240,16 @@ public class MoveCube : MonoBehaviour
   }
 
   private void BeginRotation(Vector2 dir) {
-    _isRotating = true;
+    _state                  = State.Rotating;
     _remainingRotationAngle = 90f;
 
     // Set rotation axis and direction
     if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) {
-      _rotationAxis = Vector3.forward;
+      _rotationAxis      = Vector3.forward;
       _rotationDirection = dir.x > 0 ? -1f : 1f;
     }
     else {
-      _rotationAxis = Vector3.right;
+      _rotationAxis      = Vector3.right;
       _rotationDirection = dir.y > 0 ? 1f : -1f;
     }
 
@@ -209,7 +257,7 @@ public class MoveCube : MonoBehaviour
   }
 
   private Vector3 GetRotationPoint(Vector2 dir) {
-    Vector3 center = _collider.bounds.center;
+    Vector3 center  = _collider.bounds.center;
     Vector3 extents = _collider.bounds.extents;
 
     if (dir.x > 0.99f)
@@ -230,6 +278,7 @@ public class MoveCube : MonoBehaviour
     if (step > _remainingRotationAngle) {
       step = _remainingRotationAngle;
     }
+
     transform.RotateAround(_rotationPoint, _rotationAxis, step * _rotationDirection);
     _remainingRotationAngle -= step;
 
@@ -237,13 +286,12 @@ public class MoveCube : MonoBehaviour
       StartFalling();
       return;
     }
+
     if (_remainingRotationAngle <= 0f) {
-      _isRotating = false;
+      _state = State.Idle;
       SnapToGrid();
-      if (_onSparatorTrigger && _onSparatorTrigger.IsSeparated()) {
-        _onSparatorTrigger.MergeCubes();
-      }
     }
   }
+
   #endregion
 }
