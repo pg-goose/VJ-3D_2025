@@ -161,6 +161,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba8abf073943eda55daeef0f32d70b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCore
+  cubePrefab: {fileID: 6500309188609885533, guid: 0fa71dba8d83beebb965923fd91b5427, type: 3}
+  spawn: {fileID: 0}
   fallYThreshold: -5
 --- !u!114 &4662619089792285689
 MonoBehaviour:

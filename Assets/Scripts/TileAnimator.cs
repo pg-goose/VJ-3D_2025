@@ -1,42 +1,53 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class TileAnimator : MonoBehaviour
 {
+    [SerializeField] private float duration = 0.6f;
+    [SerializeField] private float maxDelay = 0.2f;
+    [SerializeField] private float dropHeight = 20f;
+    
     private Vector3 _targetPosition;
-    private float _duration = 0.6f; 
-    private float _delay = 0f;
+    private float _delay;
+    private Action _onComplete;
 
-    public void Animate(Vector3 finalPos)
-    {
+    /// <summary>
+    /// Returns the total time this animation will take (delay + duration)
+    /// </summary>
+    public float TotalDuration => _delay + duration;
+
+    /// <summary>
+    /// Prepares the tile for animation (moves it to start position)
+    /// </summary>
+    public void Prepare(Vector3 finalPos) {
         _targetPosition = finalPos;
-        
-        transform.position = finalPos + (Vector3.down * 20f); 
-        
-        _delay = Random.Range(0f, 0.2f);
-
-        StartCoroutine(MoveUp());
+        _delay = UnityEngine.Random.Range(0f, maxDelay);
+        transform.position = finalPos + (Vector3.down * dropHeight);
     }
 
-    private IEnumerator MoveUp()
-    {
-        
+    /// <summary>
+    /// Starts the animation. Optionally calls onComplete when done.
+    /// </summary>
+    public void Play(Action onComplete = null) {
+        _onComplete = onComplete;
+        StartCoroutine(AnimateCoroutine());
+    }
+
+    private IEnumerator AnimateCoroutine() {
         yield return new WaitForSeconds(_delay);
 
         float elapsed = 0f;
         Vector3 startPos = transform.position;
 
-        while (elapsed < _duration)
-        {
-            
-            transform.position = Vector3.Lerp(startPos, _targetPosition, elapsed / _duration);
+        while (elapsed < duration) {
+            transform.position = Vector3.Lerp(startPos, _targetPosition, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        
         transform.position = _targetPosition;
-        
+        _onComplete?.Invoke();
         Destroy(this);
     }
 }

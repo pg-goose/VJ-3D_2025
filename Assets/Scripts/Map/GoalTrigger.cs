@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class GoalTrigger : MonoBehaviour, ITileStandingHandler {
+public class GoalTrigger : MonoBehaviour, ITileHandler {
   private bool _completed;
 
   public void OnPlayerStanding(PlayerCore player) {
@@ -16,4 +16,6 @@ public class GoalTrigger : MonoBehaviour, ITileStandingHandler {
     }
     GameEvents.EmitGoalReached();
   }
+
+  public void OnPlayerOver(PlayerCore player) { }
 }

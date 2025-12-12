@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class FragileTrigger : MonoBehaviour, ITileStandingHandler  {
+public class FragileTrigger : MonoBehaviour, ITileHandler  {
   private bool _broken;
 
   public void OnPlayerStanding(PlayerCore player) {
@@ -10,4 +10,6 @@ public class FragileTrigger : MonoBehaviour, ITileStandingHandler  {
     player.GetComponent<Collider>().enabled = false;
     player.GetComponent<MoveCuboid>().FallStraight = true;
   }
+
+  public void OnPlayerOver(PlayerCore player) { }
 }

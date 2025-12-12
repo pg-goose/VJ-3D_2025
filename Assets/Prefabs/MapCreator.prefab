@@ -47,9 +47,11 @@ MonoBehaviour:
   levelMaps:
   - {fileID: 4900000, guid: 28cf6d1fb1568cb4bb508f4e3e9d31dc, type: 3}
   - {fileID: 4900000, guid: a6e917f34ac582abaa47a755691ea925, type: 3}
+  spawnPoint: {fileID: 0}
   tileNormal: {fileID: 7761140359684795549, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
   tileGoal: {fileID: 5975012489397065638, guid: 3d63899e8d5d37dda8ec6d5313e34682, type: 3}
   tileFragile: {fileID: 7826549561695677205, guid: 303911b4b74a1264d8e577fd506bd197, type: 3}
   tileSeparator: {fileID: 4545557781366822706, guid: 88c973ac8ff0c11b0b31398d1927735b, type: 3}
   tileObutton: {fileID: 8557922233599738515, guid: acb264bda4755365b971581c79e89e75, type: 3}
   tileXbutton: {fileID: 1267679986052158558, guid: ba9a7fe12c8d870cf994557587a1e135, type: 3}
+  tileBridge: {fileID: 4783370356904607934, guid: 2b7a7f28264a55970beadacc5ad172c7, type: 3}

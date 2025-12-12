@@ -38,6 +38,7 @@ public class PlayerCore : MonoBehaviour {
     MoveCuboid = GetComponent<MoveCuboid>();
     RigidBody =  GetComponent<Rigidbody>();
     _originalPosition = transform.position;
+    SetPhysicsEnabled(false);
     
     Assert.IsNotNull(CenterA, $"{nameof(PlayerCore)} on {name} requires a child named 'CenterA'.");
     Assert.IsNotNull(CenterB, $"{nameof(PlayerCore)} on {name} requires a child named 'CenterB'.");

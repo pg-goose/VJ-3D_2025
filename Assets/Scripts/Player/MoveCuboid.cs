@@ -57,7 +57,6 @@ public class MoveCuboid : MonoBehaviour
     
     _collider  = GetComponent<Collider>();
     _rigidbody = GetComponent<Rigidbody>();
-    PlayerCore.SetPhysicsEnabled(false);
   }
 
   private void Start() {

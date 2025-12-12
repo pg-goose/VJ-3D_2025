@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
@@ -13,9 +14,7 @@ public class LevelManager : MonoBehaviour
   [SerializeField] private GameObject spawn;
   [SerializeField] private MapCreation mapCreation;
   [SerializeField] private GameObject mainCamera;
-
-
-
+  
   // Control de niveles
   private int _currentMapIndex = 0;
 
@@ -72,13 +71,45 @@ public class LevelManager : MonoBehaviour
 
   private void LoadLevel(int index) {
     Debug.Log($"[LevelManager] Cargando mapa índice {index}...");
-    if (mapCreation) {
-      mapCreation.UnloadMap();
-      spawn.transform.position = mapCreation.CreateMap(index);
-      Physics.SyncTransforms();
-    }
+    StartCoroutine(LoadLevelSequence(index));
+  }
 
+  private IEnumerator LoadLevelSequence(int index) {
+    mapCreation.UnloadMap();
+
+    CameraFollow cameraf = mainCamera.GetComponent<CameraFollow>();
+    Debug.Assert(cameraf);
+    cameraf.SetTarget(mapCreation.transform, true);
+    
+    MapCreation.MapData mapData = mapCreation.CreateMap(index);
+    spawn.transform.position = mapData.SpawnPosition;
+    Physics.SyncTransforms();
+    
+    yield return StartCoroutine(AnimateTiles(mapData.TileAnimators));
+    
     SetupAndResetPlayer();
+    
+    GameEvents.EmitLevelReady();
+  }
+
+  private IEnumerator AnimateTiles(List<TileAnimator> animators) {
+    if (animators == null || animators.Count == 0) yield break;
+    
+    int completedCount = 0;
+    int totalCount = animators.Count;
+    
+    foreach (TileAnimator animator in animators) {
+      if (animator) {
+        animator.Play(() => completedCount++);
+      } else {
+        completedCount++;
+      }
+    }
+    
+    // Wait until all animations complete
+    while (completedCount < totalCount) {
+      yield return null;
+    }
   }
 
   private void RestartCurrentMap() {
@@ -109,7 +140,7 @@ public class LevelManager : MonoBehaviour
     
     CameraFollow cameraf = mainCamera.GetComponent<CameraFollow>();
     Debug.Assert(cameraf);
-    cameraf.SetTarget(player.transform, true);
+    cameraf.SetTarget(player.transform, false);
 
     PlayerCore playerCore = player.GetComponent<PlayerCore>();
     Debug.Assert(playerCore);
