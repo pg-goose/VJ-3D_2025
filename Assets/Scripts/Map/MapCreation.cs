@@ -5,18 +5,17 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 
-enum TileType
-{
-  Empty = 1,
-  Normal = 2,
-  Goal = 3,
-  Spawn = 4,
-  Fragile = 5,
-  Separator = 6,
-  Obutton = 7,
-  Xbutton = 8,
-  Obridge = 9,
-  Xbridge = 10
+enum TileType {
+  Empty = 2,
+  Normal,
+  Goal,
+  Spawn,
+  Fragile,
+  Separator,
+  Obutton,
+  Xbutton,
+  Obridge,
+  Xbridge
 }
 
 class BridgeHandler
