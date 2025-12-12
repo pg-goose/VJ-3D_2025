@@ -14,6 +14,8 @@ public class LevelManager : MonoBehaviour
   [SerializeField] private GameObject spawn;
   [SerializeField] private MapCreation mapCreation;
   [SerializeField] private GameObject mainCamera;
+
+  private GameObject _cameraInitialTarget;
   
   // Control de niveles
   private int _currentMapIndex = 0;
@@ -23,8 +25,10 @@ public class LevelManager : MonoBehaviour
       Destroy(gameObject);
       return;
     }
-    Instance = this;
-    mapCreation = FindFirstObjectByType<MapCreation>();
+    Instance                                = this;
+    mapCreation                             = FindFirstObjectByType<MapCreation>();
+    _cameraInitialTarget                    = new GameObject();
+    _cameraInitialTarget.transform.position = new Vector3(-3f, 0f, -6f);
   }
 
   private void Start() {
@@ -76,19 +80,15 @@ public class LevelManager : MonoBehaviour
 
   private IEnumerator LoadLevelSequence(int index) {
     mapCreation.UnloadMap();
-
-    CameraFollow cameraf = mainCamera.GetComponent<CameraFollow>();
-    Debug.Assert(cameraf);
-    cameraf.SetTarget(mapCreation.transform, true);
     
     MapCreation.MapData mapData = mapCreation.CreateMap(index);
     spawn.transform.position = mapData.SpawnPosition;
     Physics.SyncTransforms();
+    GameEvents.EmitChangeCameraTarget(_cameraInitialTarget.transform);
     
     yield return StartCoroutine(AnimateTiles(mapData.TileAnimators));
     
     SetupAndResetPlayer();
-    
     GameEvents.EmitLevelReady();
   }
 
@@ -138,9 +138,7 @@ public class LevelManager : MonoBehaviour
     player.transform.position = spawnPos;
     player.transform.rotation = Quaternion.identity;
     
-    CameraFollow cameraf = mainCamera.GetComponent<CameraFollow>();
-    Debug.Assert(cameraf);
-    cameraf.SetTarget(player.transform, false);
+    // Camera target will be changed when player lands (see MoveCuboid.cs)
 
     PlayerCore playerCore = player.GetComponent<PlayerCore>();
     Debug.Assert(playerCore);

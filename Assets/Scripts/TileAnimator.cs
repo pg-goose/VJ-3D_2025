@@ -23,7 +23,7 @@ public class TileAnimator : MonoBehaviour
     public void Prepare(Vector3 finalPos) {
         _targetPosition = finalPos;
         _delay = UnityEngine.Random.Range(0f, maxDelay);
-        transform.position = finalPos + (Vector3.down * dropHeight);
+        transform.localPosition = finalPos + (Vector3.down * dropHeight);
     }
 
     /// <summary>
@@ -38,15 +38,15 @@ public class TileAnimator : MonoBehaviour
         yield return new WaitForSeconds(_delay);
 
         float elapsed = 0f;
-        Vector3 startPos = transform.position;
+        Vector3 startPos = transform.localPosition;
 
         while (elapsed < duration) {
-            transform.position = Vector3.Lerp(startPos, _targetPosition, elapsed / duration);
+            transform.localPosition = Vector3.Lerp(startPos, _targetPosition, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        transform.position = _targetPosition;
+        transform.localPosition = _targetPosition;
         _onComplete?.Invoke();
         Destroy(this);
     }

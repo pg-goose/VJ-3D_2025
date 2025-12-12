@@ -35,7 +35,8 @@ public static class GameEvents
     PressedTileX?.Invoke();
   }
 
-  public static void EmitCameraTargetChanged(Transform newTarget) {
+  public static void EmitChangeCameraTarget(Transform newTarget) {
+    Debug.Log("Emited CameraTargetChanged:  " + newTarget.position);
     CameraTargetChanged?.Invoke(newTarget);
   }
 }

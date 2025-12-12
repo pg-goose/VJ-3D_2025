@@ -112,7 +112,7 @@ public class MoveCube : MonoBehaviour
     if (!_otherCube) return;
     _isActive = false;
     _otherCube.SetActive(true);
-    GameEvents.EmitCameraTargetChanged(_otherCube.transform);
+    GameEvents.EmitChangeCameraTarget(_otherCube.transform);
   }
 
   private void TryBeginMovement() {

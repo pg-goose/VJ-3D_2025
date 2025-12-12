@@ -81,10 +81,16 @@ public class MoveCuboid : MonoBehaviour
         return;
         
       case State.Spawning:
-        if (!HandleFalling()) {
-          _state = State.Idle;
-          SnapToGrid();
+        if (!IsGrounded()) {
+          _rigidbody.useGravity     = true;
+          _rigidbody.freezeRotation = true;
+          return;
         }
+        _rigidbody.useGravity = false;
+        _rigidbody.freezeRotation = false;
+        _state = State.Idle;
+        SnapToGrid();
+        GameEvents.EmitChangeCameraTarget(transform);
         return;
         
       case State.Idle:

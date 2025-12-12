@@ -124,7 +124,7 @@ public class PlayerCore : MonoBehaviour {
     _moveCubeB.SetActive(true);
     
     // Emit camera target change to the active cube
-    GameEvents.EmitCameraTargetChanged(CubeB.transform);
+    GameEvents.EmitChangeCameraTarget(CubeB.transform);
   }
 
   private void HideCuboid() {
@@ -179,7 +179,7 @@ public class PlayerCore : MonoBehaviour {
     MoveCuboid.SetSpawning(true);
     
     // Emit camera target change back to the main player
-    GameEvents.EmitCameraTargetChanged(transform);
+    GameEvents.EmitChangeCameraTarget(transform);
   }
   
   public void ResetState() {

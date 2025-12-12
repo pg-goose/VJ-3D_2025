@@ -20,7 +20,7 @@ public class CameraFollow : MonoBehaviour
   }
 
   private void OnCameraTargetChanged(Transform newTarget) {
-    target = newTarget;
+    SetTarget(newTarget, false);
   }
 
   public void SetTarget(Transform newTarget, bool snapToPosition = false,
@@ -28,7 +28,9 @@ public class CameraFollow : MonoBehaviour
     target = newTarget;
     if (!target) return;
 
-    transform.position = target.position + (-transform.forward * distance);
+    if (snapToPosition) {
+      transform.position = target.position + (-transform.forward * distance);
+    }
   }
 
   private void LateUpdate() {

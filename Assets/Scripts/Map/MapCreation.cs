@@ -145,7 +145,7 @@ public class MapCreation : MonoBehaviour
     // Calculamos el centro
     float offsetX = sizeX / 2f;
     float offsetZ = sizeZ / 2f;
-
+    
     Vector3 firstNormal = Vector3.zero;
     bool    found       = false;
 
