@@ -9,6 +9,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2222292173895843044, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2222292173895843044, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2222292173895843044, guid: f8fd0d93878f1644ba84fc95bbf549c7, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: ee0be129ee2b4ca6c88becaede7e68ae, type: 2}
@@ -89,4 +97,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40587144ea8844e89e79c514987ef6ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BridgeController
-  rotationSpeed: 180

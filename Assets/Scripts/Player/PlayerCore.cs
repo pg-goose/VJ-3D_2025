@@ -194,12 +194,16 @@ public class PlayerCore : MonoBehaviour {
     _moveCubeA = null;
     _moveCubeB = null;
     
-    // Re-enable visuals
-    MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-    if (meshRenderer) meshRenderer.enabled = true;
-    MeshRenderer[] childRenderers = GetComponentsInChildren<MeshRenderer>(true);
-    foreach (MeshRenderer r in childRenderers) r.enabled = true;
+    // Re-enable visuals and collider
+    SetVisible(true);
     Collider colliderComp = GetComponent<Collider>();
     if (colliderComp) colliderComp.enabled = true;
+  }
+  
+  public void SetVisible(bool visible) {
+    MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+    if (meshRenderer) meshRenderer.enabled = visible;
+    MeshRenderer[] childRenderers = GetComponentsInChildren<MeshRenderer>(true);
+    foreach (MeshRenderer r in childRenderers) r.enabled = visible;
   }
 }

@@ -201,7 +201,7 @@ public class MapCreation : MonoBehaviour
     }
 
     Debug.Assert(tilePrefab != null);
-    GameObject tile = Instantiate(tilePrefab, position, rotation);
+    GameObject tile = Instantiate(tilePrefab, position, new Quaternion(0, 180, 0, 0));
     tile.transform.parent = transform;
     
     // Add animator and prepare it, but don't start yet

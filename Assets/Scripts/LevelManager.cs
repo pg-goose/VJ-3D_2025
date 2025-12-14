@@ -79,6 +79,10 @@ public class LevelManager : MonoBehaviour
   }
 
   private IEnumerator LoadLevelSequence(int index) {
+    // Hide player during map transition
+    PlayerCore playerCore = player.GetComponent<PlayerCore>();
+    if (playerCore) playerCore.SetVisible(false);
+    
     mapCreation.UnloadMap();
     
     MapCreation.MapData mapData = mapCreation.CreateMap(index);

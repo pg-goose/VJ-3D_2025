@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.InputSystem;
@@ -7,11 +8,12 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class MoveCuboid : MonoBehaviour
 {
-  private enum State { Spawning, Idle, Rotating, Falling }
+  private enum State { Spawning, Idle, Rotating, Falling, Winning }
   
   [Header("Movement Settings")]
   public float rotationSpeed = 200;
   public float fallSpeed = 100;
+  public float slideDownSpeed = 3f;
 
   [Header("Audio")]
   public AudioClip[] sounds;
@@ -97,6 +99,10 @@ public class MoveCuboid : MonoBehaviour
         if (HandleFalling()) return;
         TryBeginMovement();
         return;
+        
+      case State.Winning:
+        // Handled by coroutine, do nothing
+        return;
     }
   }
   
@@ -109,6 +115,10 @@ public class MoveCuboid : MonoBehaviour
   public void ResetState() {
     _state = State.Spawning;
     _remainingRotationAngle = 0f;
+    FallStraight = false;
+    
+    // Re-enable collider (disabled during win animation)
+    _collider.enabled = true;
 
     Rigidbody rb = GetComponent<Rigidbody>();
     if (!rb) return;
@@ -275,5 +285,29 @@ public class MoveCuboid : MonoBehaviour
 
   #endregion
 
+  #region Win Animation
+
+  public void StartWinAnimation() {
+    _state = State.Winning;
+    _collider.enabled = false;
+    StartCoroutine(WinAnimationCoroutine());
+  }
+
+  private IEnumerator WinAnimationCoroutine() {
+    // Slide straight down
+    float targetY = -3f; // How far down to slide
+    Vector3 startPos = transform.position;
+    Vector3 endPos = new Vector3(startPos.x, targetY, startPos.z);
+    
+    while (transform.position.y > targetY) {
+      transform.position = Vector3.MoveTowards(transform.position, endPos, slideDownSpeed * Time.deltaTime);
+      yield return null;
+    }
+    
+    transform.position = endPos;
+    GameEvents.EmitGoalReached();
+  }
+
+  #endregion
   
 }

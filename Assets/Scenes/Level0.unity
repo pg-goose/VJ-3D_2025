@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: a12f62851dd4898df878e412a8f28f85, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -202,7 +202,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 5000
+  m_ColorTemperature: 3497
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -633,6 +633,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: MapCreator
       objectReference: {fileID: 0}
+    - target: {fileID: 4210293234622267403, guid: ffb9b076d940020bf9117bc7c176e435, type: 3}
+      propertyPath: spawnPoint
+      value: 
+      objectReference: {fileID: 1078129712}
+    - target: {fileID: 4210293234622267403, guid: ffb9b076d940020bf9117bc7c176e435, type: 3}
+      propertyPath: levelMaps.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4210293234622267403, guid: ffb9b076d940020bf9117bc7c176e435, type: 3}
+      propertyPath: 'levelMaps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 4900000, guid: 5a73f6edff72bb7de95120003b534f52, type: 3}
+    - target: {fileID: 4210293234622267403, guid: ffb9b076d940020bf9117bc7c176e435, type: 3}
+      propertyPath: 'levelMaps.Array.data[1]'
+      value: 
+      objectReference: {fileID: 4900000, guid: b0b238593f307e44590c80761a14d6f2, type: 3}
     - target: {fileID: 8937073764841867141, guid: ffb9b076d940020bf9117bc7c176e435, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

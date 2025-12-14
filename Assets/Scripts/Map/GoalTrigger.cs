@@ -8,13 +8,11 @@ public class GoalTrigger : MonoBehaviour, ITileHandler {
     if (_completed) return;
     _completed = true;
 
-    // Optional: lock movement, play animation, etc.
+    // Start win animation - the cuboid will slide down into the goal
     MoveCuboid move = player.GetComponent<MoveCuboid>();
     if (move) {
-      move.enabled = false;
-      move.FallStraight = true;
+      move.StartWinAnimation();
     }
-    GameEvents.EmitGoalReached();
   }
 
   public void OnPlayerOver(PlayerCore player) { }
