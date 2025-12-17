@@ -36,8 +36,16 @@ public class LevelManager : MonoBehaviour
   }
 
   private void Update() {
-    if (Keyboard.current.digit1Key.wasPressedThisFrame) LoadLevelSafe(0);
-    if (Keyboard.current.digit2Key.wasPressedThisFrame) LoadLevelSafe(1);
+    if (Keyboard.current.digit0Key.wasPressedThisFrame) LoadLevelSafe(0);
+    if (Keyboard.current.digit1Key.wasPressedThisFrame) LoadLevelSafe(1);
+    if (Keyboard.current.digit2Key.wasPressedThisFrame) LoadLevelSafe(2);
+    if (Keyboard.current.digit3Key.wasPressedThisFrame) LoadLevelSafe(3);
+    if (Keyboard.current.digit4Key.wasPressedThisFrame) LoadLevelSafe(4);
+    if (Keyboard.current.digit5Key.wasPressedThisFrame) LoadLevelSafe(5);
+    if (Keyboard.current.digit6Key.wasPressedThisFrame) LoadLevelSafe(6);
+    if (Keyboard.current.digit7Key.wasPressedThisFrame) LoadLevelSafe(7);
+    if (Keyboard.current.digit8Key.wasPressedThisFrame) LoadLevelSafe(8);
+    if (Keyboard.current.digit9Key.wasPressedThisFrame) LoadLevelSafe(9);
   }
 
   private void OnEnable() {
