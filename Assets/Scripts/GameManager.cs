@@ -1,40 +1,72 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-  private const string MainMenuScene = "MainMenu";
-  private const string GameScene = "Level0"; //nomes una escena unica level0
-  private const string CreditsScene = "Credits";
+    
+    private const string MainMenuScene = "MainMenu";
+    private const string GameScene = "Level0"; 
+    private const string CreditsScene = "Credits";
 
-  public static GameManager Instance { get; private set; }
+    
+    public int TotalMoves { get; private set; } = 0; 
 
-  private void Awake() {
-    if (Instance != null && Instance != this) {
-      Destroy(gameObject);
-      return;
+    public static GameManager Instance { get; private set; }
+
+    
+    private void OnEnable() {
+        Debug.Log("📞 [GameManager] CONECTADO: Escuchando eventos..."); 
+        GameEvents.PlayerMoved += OnPlayerMoved; 
+        SceneManager.sceneLoaded += OnSceneLoaded; 
     }
-    Instance = this;
-    DontDestroyOnLoad(gameObject);
-  }
 
-  private void Start() {
-      
-      if (SceneManager.GetActiveScene().name != MainMenuScene)
-          LoadMainMenu();
-  }
+    private void OnDisable() {
+        GameEvents.PlayerMoved -= OnPlayerMoved; 
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
-  
-  public void StartGame() {
-    SceneManager.LoadScene(GameScene, LoadSceneMode.Single);
-  }
+    
+    private void OnPlayerMoved() {
+        TotalMoves++;
+        Debug.Log($"✅ [GameManager] ¡Recibido! Pasos totales: {TotalMoves}");
+    }
 
-  public void LoadMainMenu() {
-    SceneManager.LoadScene(MainMenuScene, LoadSceneMode.Single);
-  }
+    
+    private void Awake() {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
-  public void LoadCredits() {
-    SceneManager.LoadScene(CreditsScene, LoadSceneMode.Single);
-  }
+    private void Start() {
+        
+        if (SceneManager.GetActiveScene().name != MainMenuScene && 
+            !SceneManager.GetActiveScene().name.StartsWith("Level")) 
+            LoadMainMenu();
+    }
+
+    
+    public void StartGame() {
+        SceneManager.LoadScene(GameScene, LoadSceneMode.Single);
+    }
+
+    public void LoadMainMenu() {
+        SceneManager.LoadScene(MainMenuScene, LoadSceneMode.Single);
+    }
+
+    public void LoadCredits() {
+        SceneManager.LoadScene(CreditsScene, LoadSceneMode.Single);
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name.StartsWith("Level"))
+        {
+            
+            Debug.Log($"[GameManager] Nivel cargado: {scene.name}");
+        }
+    }
 }
