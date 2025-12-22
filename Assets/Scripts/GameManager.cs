@@ -20,11 +20,9 @@ public class GameManager : MonoBehaviour
   }
 
   private void Start() {
-      
       if (SceneManager.GetActiveScene().name != MainMenuScene)
           LoadMainMenu();
   }
-
   
   public void StartGame() {
     SceneManager.LoadScene(GameScene, LoadSceneMode.Single);

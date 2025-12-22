@@ -35,9 +35,18 @@ public class LevelManager : MonoBehaviour
     LoadLevel(_currentMapIndex);
   }
 
+  private static readonly Key[] LevelKeys = {
+    Key.Digit0, Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4,
+    Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9
+  };
+
   private void Update() {
-    if (Keyboard.current.digit1Key.wasPressedThisFrame) LoadLevelSafe(0);
-    if (Keyboard.current.digit2Key.wasPressedThisFrame) LoadLevelSafe(1);
+    for (int i = 0; i < LevelKeys.Length; i++) {
+      if (Keyboard.current[LevelKeys[i]].wasPressedThisFrame) {
+        LoadLevelSafe(i);
+        break;
+      }
+    }
   }
 
   private void OnEnable() {

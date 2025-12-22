@@ -29,11 +29,13 @@ class BridgeHandler
     Assert.IsNotNull(ctl);
     ctl.SetType(type);
     ctl.SetOther(br1);
+    ctl.Initialize();
     
     ctl = br1.GetComponent<BridgeController>();
     Assert.IsNotNull(ctl);
     ctl.SetType(type);
     ctl.SetOther(br0);
+    ctl.Initialize();
   }
 
   public bool Incomplete() {
@@ -59,7 +61,8 @@ class BridgeHandler
 
 public class MapCreation : MonoBehaviour
 {
-  [Header("Map Data")] public TextAsset[] levelMaps; //array pels nivells
+  [Header("Map Data")]
+  public TextAsset[] levelMaps;
 
   public Transform spawnPoint;
 
@@ -77,18 +80,11 @@ public class MapCreation : MonoBehaviour
   private const float TileYOffset = -0.05f;
   private static readonly char[] MapSeparators = { ' ', '\n', '\r' };
 
-  /// <summary>
-  /// Result of map creation containing spawn position and tile animators
-  /// </summary>
   public struct MapData {
     public Vector3 SpawnPosition;
     public List<TileAnimator> TileAnimators;
   }
 
-  /// <summary>
-  /// Crea el mapa basado en el índice del nivel (0 para nivel 1, 1 para nivel 2...)
-  /// Returns MapData with spawn position and list of tile animators for orchestration
-  /// </summary>
   public MapData CreateMap(int levelIndex) {
     var result = new MapData {
       SpawnPosition = new Vector3(0, 10, 0),

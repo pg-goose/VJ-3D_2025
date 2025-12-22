@@ -22,15 +22,35 @@ public class BridgeController : MonoBehaviour
 
   public void SetOther(GameObject other) {
     _other = other;
-    OnEnable();
   }
   
   public void SetType(BridgeType type) {
     _type = type;
   }
 
+  public void Initialize() {
+    UnsubscribeFromButtonEvents();
+    SubscribeToButtonEvents();
+  }
+  
+  private bool IsExtended() {
+    return transform.rotation.x == 0f;
+  }
+
+  private void EnsureRetracted() {
+    if (IsExtended()) OnPressedButton();
+  }
+
+  private void OnLevelReady() {
+    Invoke(nameof(EnsureRetracted), .5f);
+  }
+  
   private void OnEnable() {
     GameEvents.LevelReady += ComputeRotationAxisAndPivot;
+    GameEvents.LevelReady += OnLevelReady;
+  }
+
+  private void SubscribeToButtonEvents() {
     switch (_type) {
     case BridgeType.O:
       GameEvents.PressedTileO += OnPressedButton;
@@ -45,20 +65,17 @@ public class BridgeController : MonoBehaviour
     }
   }
 
+  private void UnsubscribeFromButtonEvents() {
+    // Unsubscribe from both to be safe (in case type changed)
+    GameEvents.PressedTileO -= OnPressedButton;
+    GameEvents.PressedTileX -= OnPressedButton;
+  }
+
   private void OnDisable() {
+    CancelInvoke();
     GameEvents.LevelReady -= ComputeRotationAxisAndPivot;
-    switch (_type) {
-    case BridgeType.O:
-      GameEvents.PressedTileO -= OnPressedButton;
-    break;
-    case BridgeType.X:
-      GameEvents.PressedTileX -= OnPressedButton;
-    break;
-    case BridgeType.Null:
-    break;
-    default:
-      throw new ArgumentOutOfRangeException();
-    }
+    GameEvents.LevelReady -= OnLevelReady;
+    UnsubscribeFromButtonEvents();
   }
 
   private void Update() {
@@ -66,6 +83,7 @@ public class BridgeController : MonoBehaviour
   }
 
   private void OnPressedButton() {
+    if (this == null) return;
     if (_isAnimating) return;
     
     _rotationDir *= -1;
@@ -103,6 +121,8 @@ public class BridgeController : MonoBehaviour
   }
 
   private void ComputeRotationAxisAndPivot() {
+    if (_other == null) return;
+    
     Vector3 myPos = transform.position;
     Vector3 otherPos = _other.transform.position;
     Vector3 toOther = otherPos - myPos;

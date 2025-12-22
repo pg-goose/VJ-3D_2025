@@ -26,10 +26,12 @@ public class PlayerCore : MonoBehaviour {
 
   private void OnEnable() {
     GameEvents.PlayerDied += RestoreCuboid;
+    GameEvents.CubeFell   += RestoreCuboid;
   }
 
   private void OnDisable() {
     GameEvents.PlayerDied -= RestoreCuboid;
+    GameEvents.CubeFell   -= RestoreCuboid;
   }
 
   private void Awake() {

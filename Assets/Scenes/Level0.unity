@@ -451,6 +451,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: clank
+      value: 
+      objectReference: {fileID: 8300000, guid: 7bafafa7e24e7c85a83dccd7959809a2, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: clonk
+      value: 
+      objectReference: {fileID: 8300000, guid: ef1e21786a38390edb84cdbfe5cc8a55, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: screech
+      value: 
+      objectReference: {fileID: 8300000, guid: 4db351fd9a3d383dd89aaf4c51fd484c, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: bigclonk
+      value: 
+      objectReference: {fileID: 8300000, guid: 15af828eef50636e5b2f527e536763db, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: fallSound
+      value: 
+      objectReference: {fileID: 8300000, guid: bbacfec486e2dd0ad9be59f89d210baf, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: slideDownSpeed
+      value: 1.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: sounds.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: 'sounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: ef1e21786a38390edb84cdbfe5cc8a55, type: 3}
+    - target: {fileID: 4662619089792285689, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
+      propertyPath: 'sounds.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 7bafafa7e24e7c85a83dccd7959809a2, type: 3}
     - target: {fileID: 6934729401208589151, guid: 2747d09d98535ca16b2073301d97a6e0, type: 3}
       propertyPath: spawn
       value: 
