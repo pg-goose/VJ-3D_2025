@@ -82,3 +82,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 751189a99c4243b19920d5eef4926e0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BridgeXTrigger
+  pressed: {fileID: 8300000, guid: c13f5400b5dc2fa8bbfd75cf7312e79f, type: 3}

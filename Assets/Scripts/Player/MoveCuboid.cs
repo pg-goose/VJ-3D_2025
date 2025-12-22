@@ -6,23 +6,28 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(AudioSource))]
 public class MoveCuboid : MonoBehaviour
 {
   private enum State { Spawning, Idle, Rotating, Falling, Winning }
   
   [Header("Movement Settings")]
-  public float rotationSpeed = 200;
+  public float rotationSpeed = 400f;
   public float fallSpeed = 100;
-  public float slideDownSpeed = 3f;
+  public float slideDownSpeed = 1.5f;
 
   [Header("Audio")]
-  public AudioClip[] sounds;
+  public AudioClip clank;
+  public AudioClip clonk;
+  public AudioClip screech;
+  public AudioClip bigclonk;
   public AudioClip fallSound;
 
   [Header("Balance Points")]
   public Transform centerA;
   public Transform centerB;
 
+  private AudioSource _audioSource;
   private Collider _collider;
   private LayerMask _groundMask;
   private Rigidbody _rigidbody;
@@ -34,31 +39,24 @@ public class MoveCuboid : MonoBehaviour
   private float _rotationDirection;
   private Vector3 _rotationPoint;
   private bool _rotationStartedStanding;
-
+  
   // state
   private State _state = State.Spawning;
   public bool FallStraight { get; set; }
-
-
-  #region Debug
-
+  private PlayerCore playerCore { get; set; }
+  
   private void DrawDebugLines() {
     Debug.DrawLine(centerA.position, centerB.position);
     if (_state == State.Rotating) Debug.DrawLine(transform.position, _rotationPoint, Color.blue);
   }
-
-  #endregion
-
-  #region Unity
-
-  private PlayerCore PlayerCore { get; set; }
   
   private void Awake() {
-    PlayerCore = GetComponent<PlayerCore>();
-    Assert.IsNotNull(PlayerCore);
+    playerCore = GetComponent<PlayerCore>();
+    Assert.IsNotNull(playerCore);
     
-    _collider  = GetComponent<Collider>();
-    _rigidbody = GetComponent<Rigidbody>();
+    _audioSource = GetComponent<AudioSource>();
+    _collider    = GetComponent<Collider>();
+    _rigidbody   = GetComponent<Rigidbody>();
   }
 
   private void Start() {
@@ -71,15 +69,18 @@ public class MoveCuboid : MonoBehaviour
     
     switch (_state) {
       case State.Falling:
-        PlayerCore.SetPhysicsEnabled(true);
+        playerCore.SetPhysicsEnabled(true);
+        if (!_audioSource.isPlaying) PlaySound(fallSound);
         if (!IsGrounded()) return;
-        PlayerCore.SetPhysicsEnabled(false);
+        playerCore.SetPhysicsEnabled(false);
         _state = State.Idle;
         SnapToGrid();
         return;
         
       case State.Rotating:
         RotationStep();
+        if (_state == State.Idle)
+          RotationFinished();
         return;
         
       case State.Spawning:
@@ -93,6 +94,7 @@ public class MoveCuboid : MonoBehaviour
         _state = State.Idle;
         SnapToGrid();
         GameEvents.EmitChangeCameraTarget(transform);
+        PlaySound(bigclonk);
         return;
         
       case State.Idle:
@@ -117,7 +119,6 @@ public class MoveCuboid : MonoBehaviour
     _remainingRotationAngle = 0f;
     FallStraight = false;
     
-    // Re-enable collider (disabled during win animation)
     _collider.enabled = true;
 
     Rigidbody rb = GetComponent<Rigidbody>();
@@ -127,10 +128,6 @@ public class MoveCuboid : MonoBehaviour
     rb.angularVelocity = Vector3.zero;
     rb.useGravity  = false; 
   }
-
-  #endregion
-
-  #region Positioning
 
   private void SnapToGrid() {
     // Local lambda that snaps a single axis
@@ -158,13 +155,9 @@ public class MoveCuboid : MonoBehaviour
     transform.position = pos;
   }
 
-  #endregion
-
   public void SetSpawning(bool value) {
     _state = value ? State.Spawning : State.Idle;
   }
-
-  #region Grounding & Standing
 
   private bool IsPointGrounded(Transform point, Color debugColor) {
     RaycastHit hit;
@@ -185,10 +178,6 @@ public class MoveCuboid : MonoBehaviour
   private bool IsStanding() {
     return Mathf.Abs(centerA.position.y - centerB.position.y) > 0.001f;
   }
-
-  #endregion
-
-  #region Movement & Rotation
 
   private bool HasMovementInput(Vector2 dir) {
     return Mathf.Abs(dir.x) > 0.99f || Mathf.Abs(dir.y) > 0.99f;
@@ -240,8 +229,17 @@ public class MoveCuboid : MonoBehaviour
     }
     if (_remainingRotationAngle <= 0f) {
       _state = State.Idle;
-      SnapToGrid();
     }
+  }
+
+  private void RotationFinished() {
+    SnapToGrid();
+    if (IsStanding()) PlaySound(clonk);
+    else PlaySound(clank);
+  }
+
+  private void PlaySound(AudioClip clip) {
+    if (clip) _audioSource.PlayOneShot(clip);
   }
 
   private bool HandleFalling() {
@@ -250,8 +248,8 @@ public class MoveCuboid : MonoBehaviour
       return true;
     }
 
-    if (PlayerCore.IsPhysicsEnabled())
-      PlayerCore.SetPhysicsEnabled(false);
+    if (playerCore.IsPhysicsEnabled())
+      playerCore.SetPhysicsEnabled(false);
 
     return false;
   }
@@ -274,7 +272,7 @@ public class MoveCuboid : MonoBehaviour
       return;
     }
 
-    PlayerCore.SetPhysicsEnabled(true);
+    playerCore.SetPhysicsEnabled(true);
 
     if (_rotationAxis == Vector3.zero || Mathf.Approximately(rotationSpeed, 0f))
         return;
@@ -285,11 +283,7 @@ public class MoveCuboid : MonoBehaviour
     AdjustCenterOfMass();
     if (fallSound) AudioSource.PlayClipAtPoint(fallSound, transform.position);
   }
-
-  #endregion
-
-  #region Win Animation
-
+  
   public void StartWinAnimation() {
     _state = State.Winning;
     _collider.enabled = false;
@@ -297,10 +291,10 @@ public class MoveCuboid : MonoBehaviour
   }
 
   private IEnumerator WinAnimationCoroutine() {
-    // Slide straight down
-    float targetY = -3f; // How far down to slide
+    float targetY = -2f;
     Vector3 startPos = transform.position;
-    Vector3 endPos = new Vector3(startPos.x, targetY, startPos.z);
+    var endPos = new Vector3(startPos.x, targetY, startPos.z);
+    _audioSource.PlayOneShot(screech);
     
     while (transform.position.y > targetY) {
       transform.position = Vector3.MoveTowards(transform.position, endPos, slideDownSpeed * Time.deltaTime);
@@ -310,7 +304,4 @@ public class MoveCuboid : MonoBehaviour
     transform.position = endPos;
     GameEvents.EmitGoalReached();
   }
-
-  #endregion
-  
 }

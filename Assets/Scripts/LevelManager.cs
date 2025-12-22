@@ -35,17 +35,18 @@ public class LevelManager : MonoBehaviour
     LoadLevel(_currentMapIndex);
   }
 
+  private static readonly Key[] LevelKeys = {
+    Key.Digit0, Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4,
+    Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9
+  };
+
   private void Update() {
-    if (Keyboard.current.digit0Key.wasPressedThisFrame) LoadLevelSafe(0);
-    if (Keyboard.current.digit1Key.wasPressedThisFrame) LoadLevelSafe(1);
-    if (Keyboard.current.digit2Key.wasPressedThisFrame) LoadLevelSafe(2);
-    if (Keyboard.current.digit3Key.wasPressedThisFrame) LoadLevelSafe(3);
-    if (Keyboard.current.digit4Key.wasPressedThisFrame) LoadLevelSafe(4);
-    if (Keyboard.current.digit5Key.wasPressedThisFrame) LoadLevelSafe(5);
-    if (Keyboard.current.digit6Key.wasPressedThisFrame) LoadLevelSafe(6);
-    if (Keyboard.current.digit7Key.wasPressedThisFrame) LoadLevelSafe(7);
-    if (Keyboard.current.digit8Key.wasPressedThisFrame) LoadLevelSafe(8);
-    if (Keyboard.current.digit9Key.wasPressedThisFrame) LoadLevelSafe(9);
+    for (int i = 0; i < LevelKeys.Length; i++) {
+      if (Keyboard.current[LevelKeys[i]].wasPressedThisFrame) {
+        LoadLevelSafe(i);
+        break;
+      }
+    }
   }
 
   private void OnEnable() {
@@ -76,13 +77,9 @@ public class LevelManager : MonoBehaviour
       LoadLevel(index);
       return;
     }
-    Debug.LogWarning(
-      $"[LevelManager] Has pulsado la tecla {index + 1}, pero solo tienes {mapCreation.levelMaps.Length} mapas en la lista."
-    );
   }
 
   private void LoadLevel(int index) {
-    Debug.Log($"[LevelManager] Cargando mapa índice {index}...");
     StartCoroutine(LoadLevelSequence(index));
   }
 
@@ -129,14 +126,11 @@ public class LevelManager : MonoBehaviour
   }
 
   public void OnGoalReached() {
-    Debug.Log("¡Nivel Completado!");
-
     if (mapCreation != null && _currentMapIndex + 1 < mapCreation.levelMaps.Length) {
       _currentMapIndex++;
       Invoke(nameof(LoadNextMapDelay), 1.0f);
       return;
     }
-    Debug.Log("Juego terminado. Cargando créditos...");
     GameManager.Instance.LoadCredits();
   }
 

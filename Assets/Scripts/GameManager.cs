@@ -15,7 +15,6 @@ public class GameManager : MonoBehaviour
 
     
     private void OnEnable() {
-        Debug.Log("📞 [GameManager] CONECTADO: Escuchando eventos..."); 
         GameEvents.PlayerMoved += OnPlayerMoved; 
         SceneManager.sceneLoaded += OnSceneLoaded; 
     }
@@ -25,13 +24,10 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    
     private void OnPlayerMoved() {
         TotalMoves++;
-        Debug.Log($"✅ [GameManager] ¡Recibido! Pasos totales: {TotalMoves}");
     }
 
-    
     private void Awake() {
         if (Instance != null && Instance != this) {
             Destroy(gameObject);
@@ -42,12 +38,10 @@ public class GameManager : MonoBehaviour
     }
 
     private void Start() {
-        
         if (SceneManager.GetActiveScene().name != MainMenuScene && 
             !SceneManager.GetActiveScene().name.StartsWith("Level")) 
             LoadMainMenu();
     }
-
     
     public void StartGame() {
         SceneManager.LoadScene(GameScene, LoadSceneMode.Single);
@@ -61,11 +55,8 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(CreditsScene, LoadSceneMode.Single);
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        if (scene.name.StartsWith("Level"))
-        {
-            
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        if (scene.name.StartsWith("Level")) {
             Debug.Log($"[GameManager] Nivel cargado: {scene.name}");
         }
     }

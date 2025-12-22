@@ -5,11 +5,11 @@ COMPLETE:
 TODO:
 * [ ] 3 pantalles: Menú, Jugar i Crèdits
   * [x] scena menu
-  * [ ] scenas nivells 1-10
-  * [ ] scena credits
+  * [x] scenas nivells 1-10
+  * [x] scena credits
 
 * [x] Càmera ortogràfica orientada com al Bloxorz
-* [ ] Fons de cada nivell no sòlid
+* [x] Fons de cada nivell no sòlid
 * [x] Moviment/rotació del bloc amb WASD i fletxes
 * [x] Si alguna part del bloc no està sustentada, cau i es repeteix el nivell
 * [x] Si el bloc vertical entra al tile de destí, llisca dins i passa al següent nivell
@@ -20,7 +20,7 @@ TODO:
 * [x] Tiles de divisió: separen el bloc en dos; si es toquen, es recombinen
 * [x] Tiles taronja: no sostenen el bloc vertical sencer; els cubs separats sí que hi poden passar
 
-* [ ] 10 nivells de dificultat creixent (del Bloxorz original o propis)
+* [x] 10 nivells de dificultat creixent (del Bloxorz original o propis)
 * [ ] Sortides: guanyar (girar i pujar) i perdre (caure) com al Bloxorz
 * [ ] HUD amb el total de moviments emprats per guanyar tots els nivells anteriors
 * [ ] So i música
