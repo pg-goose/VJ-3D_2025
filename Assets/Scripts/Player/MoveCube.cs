@@ -18,7 +18,6 @@ public class MoveCube : MonoBehaviour
 {
   private enum State
   {
-    Spawning,
     Idle,
     Rotating,
     Falling
@@ -118,6 +117,7 @@ public class MoveCube : MonoBehaviour
     if (!_isActive) return;
     Vector2 dir = _moveAction.ReadValue<Vector2>();
     if (!HasMovementInput(dir)) return;
+    GameEvents.EmitPlayerMoved();
     BeginRotation(dir);
   }
 
@@ -195,14 +195,6 @@ public class MoveCube : MonoBehaviour
   }
 
   private void StartFalling() {
-    bool wasSpawning = _state == State.Spawning;
-    _state = State.Falling;
-
-    if (wasSpawning) {
-      _rigidbody.useGravity = true;
-      return;
-    }
-
     SetPhysicsEnabled(true);
 
     if (_rotationAxis != Vector3.zero && !Mathf.Approximately(rotSpeed, 0f)) {
@@ -281,5 +273,24 @@ public class MoveCube : MonoBehaviour
     AudioClip clip = sounds[_soundIndex % sounds.Length];
     _soundIndex++;
     if (clip) _audioSource.PlayOneShot(clip);
+  }
+  
+  private bool OnCollider(Collider other) {
+    Vector3 posC = other.transform.position;
+    bool OnPosC(Vector3 center) => MathUtils.Approximately(center.x, posC.x) &&
+                                   MathUtils.Approximately(center.z, posC.z);
+    Vector3 posA = transform.position;
+    if (OnPosC(posA)) return true;
+    return false;
+  }
+
+  public void OnTriggerStay(Collider other) {
+    if (!OnCollider(other)) return;
+    ITileHandler[] handlers = other.GetComponents<ITileHandler>();
+    if (handlers.Length == 0) return;
+    
+    foreach (ITileHandler t in handlers) {
+      t.OnPlayerOver(null);
+    }
   }
 }

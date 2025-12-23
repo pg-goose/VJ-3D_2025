@@ -5,7 +5,7 @@ public class FragileTrigger : MonoBehaviour, ITileHandler  {
   private bool _broken;
 
   public void OnPlayerStanding(PlayerCore player) {
-    if (_broken) return;
+    if (_broken || player == null) return;
     _broken = true;
     player.GetComponent<Collider>().enabled = false;
     player.GetComponent<MoveCuboid>().FallStraight = true;

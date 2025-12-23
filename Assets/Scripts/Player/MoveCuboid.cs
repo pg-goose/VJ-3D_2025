@@ -111,6 +111,7 @@ public class MoveCuboid : MonoBehaviour
   private void TryBeginMovement() {
     Vector2 dir = _moveAction.ReadValue<Vector2>();
     if (!HasMovementInput(dir)) return;
+    GameEvents.EmitPlayerMoved();
     BeginRotation(dir);
   }
   
@@ -184,9 +185,6 @@ public class MoveCuboid : MonoBehaviour
   }
 
   private void BeginRotation(Vector2 dir) {
-    Debug.Log("PLAYER: ¡He emitido un movimiento!");
-    GameEvents.EmitPlayerMoved();
-
     _state                   = State.Rotating;
     _remainingRotationAngle  = 90f;
     _rotationStartedStanding = IsStanding();
